@@ -17,7 +17,7 @@ interface RentiTemApi {
     @POST("api/v1/auth/register")
     suspend fun signUp(@Body request: SignUpRequest): SignUpResponse
 
-    @GET("api/v1/publications")
+    @GET("api/v1/items")
     suspend fun getPublications(): List<PublicationDto>
 
     @POST("api/v1/items")
