@@ -23,12 +23,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext // ⚠️ IMPORTANTE
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.rentitem.features.itempublications.presentation.viewmodels.PublicationsUiState
 import com.rentitem.features.itempublications.presentation.viewmodels.PublicationsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -37,23 +37,24 @@ fun CreatePublicationModal(
     viewModel: PublicationsViewModel,
     onDismiss: () -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val isLoading = uiState is PublicationsUiState.Loading
+    val formState by viewModel.formState.collectAsState()
 
-    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-    var selectedPriceType by remember { mutableStateOf("día") }
-    var expanded by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
+    var expandedPriceType by remember { mutableStateOf(false) }
     val priceTypes = listOf("hora", "día", "semana", "mes", "uso")
 
     val photoPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri -> selectedImageUri = uri }
+        onResult = { uri ->
+            viewModel.onImageSelected(uri)
+        }
     )
 
-    val isFormComplete = viewModel.title.isNotBlank() && 
-                         viewModel.description.isNotBlank() && 
-                         viewModel.price.isNotBlank()
+    val isFormComplete = formState.title.isNotBlank() &&
+            formState.description.isNotBlank() &&
+            formState.price.isNotBlank() &&
+            formState.selectedImageUri != null
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -64,10 +65,9 @@ fun CreatePublicationModal(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.9f)
+                .fillMaxHeight(0.95f)
                 .padding(16.dp)
         ) {
-            // --- HEADER ---
             Box(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center
@@ -89,7 +89,6 @@ fun CreatePublicationModal(
             }
             HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
 
-            // --- USER INFO ---
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = Icons.Default.AccountCircle,
@@ -99,11 +98,7 @@ fun CreatePublicationModal(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
-                    Text(
-                        text = "Usuario RentiTem",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
+                    Text(text = "Usuario RentiTem", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     Surface(
                         color = Color.LightGray.copy(alpha = 0.3f),
                         shape = RoundedCornerShape(4.dp),
@@ -120,11 +115,10 @@ fun CreatePublicationModal(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // --- INPUT AREA ---
             OutlinedTextField(
-                value = viewModel.title,
+                value = formState.title,
                 onValueChange = { viewModel.onTitleChange(it) },
-                placeholder = { Text("Título de tu anuncio", fontSize = 18.sp) },
+                label = { Text("Título de tu anuncio") },
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color.Transparent,
@@ -133,9 +127,9 @@ fun CreatePublicationModal(
             )
 
             TextField(
-                value = viewModel.description,
+                value = formState.description,
                 onValueChange = { viewModel.onDescriptionChange(it) },
-                placeholder = { Text("¿Qué estás pensando en anunciar?", fontSize = 16.sp, color = Color.Gray) },
+                placeholder = { Text("¿Qué estás pensando en anunciar?", color = Color.Gray) },
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
@@ -147,13 +141,12 @@ fun CreatePublicationModal(
                     .weight(1f)
             )
 
-            // --- PRECIO INPUT Y SELECTOR ---
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 OutlinedTextField(
-                    value = viewModel.price,
+                    value = formState.price,
                     onValueChange = { viewModel.onPriceChange(it) },
                     label = { Text("Precio ($)") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -161,29 +154,39 @@ fun CreatePublicationModal(
                     singleLine = true
                 )
                 Spacer(modifier = Modifier.width(8.dp))
+
                 Box(modifier = Modifier.weight(1f)) {
                     OutlinedTextField(
-                        value = "por $selectedPriceType",
+                        value = "por ${formState.priceType}",
                         onValueChange = {},
                         readOnly = true,
                         label = { Text("Frecuencia") },
-                        modifier = Modifier.fillMaxWidth().clickable { expanded = true },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { expandedPriceType = true },
                         trailingIcon = {
-                            IconButton(onClick = { expanded = true }) {
+                            IconButton(onClick = { expandedPriceType = true }) {
                                 Icon(Icons.Default.Add, contentDescription = null)
                             }
-                        }
+                        },
+                        enabled = false
                     )
+
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .clickable { expandedPriceType = true }
+                    )
+
                     DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
+                        expanded = expandedPriceType,
+                        onDismissRequest = { expandedPriceType = false }
                     ) {
                         priceTypes.forEach { type ->
                             DropdownMenuItem(
                                 text = { Text("por $type") },
                                 onClick = {
-                                    selectedPriceType = type
-                                    expanded = false
+                                    expandedPriceType = false
                                 }
                             )
                         }
@@ -191,27 +194,44 @@ fun CreatePublicationModal(
                 }
             }
 
-            // --- IMAGEN PREVIEW ---
-            if (selectedImageUri != null) {
-                Box(modifier = Modifier.padding(vertical = 8.dp).fillMaxWidth().height(150.dp)) {
+            if (formState.selectedImageUri != null) {
+                Box(
+                    modifier = Modifier
+                        .padding(vertical = 8.dp)
+                        .fillMaxWidth()
+                        .height(200.dp) // Un poco más grande
+                        .clip(RoundedCornerShape(8.dp))
+                        .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp))
+                ) {
                     AsyncImage(
-                        model = selectedImageUri,
+                        model = formState.selectedImageUri,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(8.dp))
+                        modifier = Modifier.fillMaxSize()
                     )
                     IconButton(
-                        onClick = { selectedImageUri = null },
-                        modifier = Modifier.align(Alignment.TopEnd).background(Color.Black.copy(0.5f), CircleShape)
+                        onClick = { viewModel.onImageSelected(null) },
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(4.dp)
+                            .background(Color.Black.copy(0.6f), CircleShape)
                     ) {
-                        Icon(Icons.Default.Close, contentDescription = "Borrar foto", tint = Color.White)
+                        Icon(Icons.Default.Close, contentDescription = "Borrar", tint = Color.White)
                     }
                 }
             }
 
+            if (formState.formError != null) {
+                Text(
+                    text = formState.formError!!,
+                    color = MaterialTheme.colorScheme.error,
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
-            // --- ADD TO POST BAR ---
             Card(
                 shape = RoundedCornerShape(8.dp),
                 border = androidx.compose.foundation.BorderStroke(1.dp, Color.LightGray.copy(alpha = 0.5f)),
@@ -230,7 +250,7 @@ fun CreatePublicationModal(
                         }) {
                             Icon(Icons.Default.Add, contentDescription = "Foto", tint = Color(0xFF4CAF50))
                         }
-                        IconButton(onClick = { /* TODO: Feature Ubicación */ }) {
+                        IconButton(onClick = { /* Feature futura */ }) {
                             Icon(Icons.Default.Place, contentDescription = "Ubicación", tint = Color(0xFFF44336))
                         }
                     }
@@ -239,15 +259,16 @@ fun CreatePublicationModal(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // --- SUBMIT BUTTON ---
             Button(
-                onClick = { viewModel.createPublication { onDismiss() } },
-                modifier = Modifier.fillMaxWidth().height(48.dp),
-                enabled = isFormComplete && !isLoading,
+                onClick = { viewModel.createPublication(context) { onDismiss() } },
+                modifier = Modifier.fillMaxWidth().height(50.dp),
+                enabled = isFormComplete && !formState.isFormLoading,
                 shape = RoundedCornerShape(8.dp)
             ) {
-                if (isLoading) {
+                if (formState.isFormLoading) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color.White)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Subiendo...")
                 } else {
                     Text("Publicar")
                 }
