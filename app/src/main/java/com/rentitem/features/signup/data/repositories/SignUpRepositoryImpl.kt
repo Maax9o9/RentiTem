@@ -25,7 +25,8 @@ class SignUpRepositoryImpl(
         )
         val response = api.signUp(request)
         
-        // Manejamos el caso de que 'user' sea nulo en la respuesta
+        // El error ocurría aquí porque se intentaba acceder a 'user' sin seguridad nula.
+        // Ahora usamos los datos de la respuesta si existen, o los del formulario como respaldo.
         return SignUpEntity(
             fullName = response.user?.fullName ?: fullName,
             email = response.user?.email ?: email,

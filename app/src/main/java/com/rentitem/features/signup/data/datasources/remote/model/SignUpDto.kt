@@ -25,6 +25,5 @@ data class SignUpRequest(
 @Serializable
 data class SignUpResponse(
     @SerialName("token") val token: String,
-    // El campo 'user' ahora es opcional para evitar crashes si no viene en la respuesta
-    @SerialName("user") val user: UserDto? = null 
+    @SerialName("user") val user: UserDto? = null
 )
