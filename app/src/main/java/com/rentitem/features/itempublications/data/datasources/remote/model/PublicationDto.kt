@@ -11,7 +11,9 @@ data class PublicationDto(
     @SerialName("Price") val price: Double,
     @SerialName("Description") val description: String,
     @SerialName("ImageURL") val imageUrl: String? = null,
-    @SerialName("CreatedAt") val createdAt: String? = null
+    @SerialName("CreatedAt") val createdAt: String? = null,
+    @SerialName("City") val city: String? = null,
+    @SerialName("State") val state: String? = null
 )
 
 @Serializable
@@ -23,8 +25,17 @@ data class CreatePublicationRequest(
 
 @Serializable
 data class CreateItemResponse(
-    @SerialName("id") val id: Int
+    @SerialName("item") val item: PublicationDto? = null,
+    @SerialName("ID") val id: Int? = null,
+    @SerialName("Title") val title: String? = null,
+    @SerialName("Price") val price: Double? = null,
+    @SerialName("Description") val description: String? = null,
+    @SerialName("ImageURL") val imageUrl: String? = null,
+    @SerialName("CreatedAt") val createdAt: String? = null,
+    @SerialName("City") val city: String? = null,
+    @SerialName("State") val state: String? = null
 )
+
 fun PublicationDto.toDomain(): Publication {
     val baseUrl = "https://codigoverse.space/"
 
@@ -33,14 +44,14 @@ fun PublicationDto.toDomain(): Publication {
         title = title,
         price = price,
         description = description,
-
         imageUrl = if (!imageUrl.isNullOrBlank()) {
             val cleanPath = imageUrl.removePrefix("/")
             "$baseUrl$cleanPath"
         } else {
             null
         },
-
-        createdAt = createdAt
+        createdAt = createdAt,
+        city = city,
+        state = state
     )
 }

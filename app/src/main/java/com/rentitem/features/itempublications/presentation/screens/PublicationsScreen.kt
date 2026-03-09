@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rentitem.features.itempublications.presentation.components.CreatePublicationModal
 import com.rentitem.features.itempublications.presentation.components.HomeHeader
 import com.rentitem.features.itempublications.presentation.components.PublicationCard
@@ -21,7 +22,8 @@ import com.rentitem.features.itempublications.presentation.viewmodels.Publicatio
 fun PublicationsScreen(
     viewModel: PublicationsViewModel
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val formState by viewModel.formState.collectAsStateWithLifecycle()
     var showModal by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -41,13 +43,12 @@ fun PublicationsScreen(
                 .fillMaxSize()
                 .background(Color.LightGray.copy(alpha = 0.2f))
         ) {
-            // --- HEADER COMPONENT (Barra de búsqueda + Trigger de publicación) ---
             HomeHeader(
-                onSearch = { /* TODO: Implementar búsqueda */ },
+                searchText = formState.searchText,
+                onSearchChange = { viewModel.onSearchChange(it) },
                 onTriggerClick = { showModal = true }
             )
 
-            // --- CONTENIDO (Lista de Publicaciones) ---
             Box(modifier = Modifier.fillMaxSize()) {
                 when (val state = uiState) {
                     is PublicationsUiState.Loading -> {
@@ -67,7 +68,10 @@ fun PublicationsScreen(
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 items(state.publications) { item ->
-                                    PublicationCard(publication = item)
+                                    PublicationCard(
+                                        publication = item,
+                                        onDelete = { id -> viewModel.deletePublication(id) }
+                                    )
                                 }
                             }
                         }

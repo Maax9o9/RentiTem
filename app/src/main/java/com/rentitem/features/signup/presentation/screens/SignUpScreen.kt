@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rentitem.features.signup.presentation.viewmodels.SignUpUiState
 import com.rentitem.features.signup.presentation.viewmodels.SignUpViewModel
 
@@ -17,10 +18,11 @@ fun SignUpScreen(
     viewModel: SignUpViewModel,
     onBack: () -> Unit
 ) {
-    val state by viewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val formState by viewModel.formState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(state) {
-        if (state is SignUpUiState.Success) {
+    LaunchedEffect(uiState) {
+        if (uiState is SignUpUiState.Success) {
             onBack()
         }
     }
@@ -36,35 +38,35 @@ fun SignUpScreen(
         Spacer(Modifier.height(16.dp))
         
         OutlinedTextField(
-            value = viewModel.name,
+            value = formState.name,
             onValueChange = { viewModel.onNameChange(it) },
             label = { Text("Nombre Completo") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
         OutlinedTextField(
-            value = viewModel.email,
+            value = formState.email,
             onValueChange = { viewModel.onEmailChange(it) },
             label = { Text("Email") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
         OutlinedTextField(
-            value = viewModel.phone,
+            value = formState.phone,
             onValueChange = { viewModel.onPhoneChange(it) },
             label = { Text("Teléfono") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
         OutlinedTextField(
-            value = viewModel.address,
+            value = formState.address,
             onValueChange = { viewModel.onAddressChange(it) },
             label = { Text("Dirección") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
         OutlinedTextField(
-            value = viewModel.password,
+            value = formState.password,
             onValueChange = { viewModel.onPasswordChange(it) },
             label = { Text("Contraseña") },
             modifier = Modifier.fillMaxWidth(),
@@ -74,7 +76,7 @@ fun SignUpScreen(
 
         Spacer(Modifier.height(24.dp))
 
-        when (state) {
+        when (uiState) {
             is SignUpUiState.Loading -> CircularProgressIndicator()
             else -> {
                 Button(
@@ -86,9 +88,9 @@ fun SignUpScreen(
             }
         }
 
-        if (state is SignUpUiState.Error) {
+        if (uiState is SignUpUiState.Error) {
             Text(
-                text = (state as SignUpUiState.Error).message,
+                text = (uiState as SignUpUiState.Error).message,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(top = 8.dp)
             )

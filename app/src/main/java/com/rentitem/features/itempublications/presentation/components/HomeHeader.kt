@@ -20,7 +20,8 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun HomeHeader(
-    onSearch: (String) -> Unit,
+    searchText: String,
+    onSearchChange: (String) -> Unit,
     onTriggerClick: () -> Unit
 ) {
     Column(
@@ -29,16 +30,15 @@ fun HomeHeader(
             .background(MaterialTheme.colorScheme.surface)
             .padding(16.dp)
     ) {
-        // 1. SEARCH BAR
         OutlinedTextField(
-            value = "",
-            onValueChange = { onSearch(it) },
+            value = searchText,
+            onValueChange = onSearchChange,
             placeholder = { Text("Buscar publicaciones...") },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
-            shape = RoundedCornerShape(25.dp), // Redondeado estilo moderno
+            shape = RoundedCornerShape(25.dp), 
             colors = TextFieldDefaults.colors(
                 unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                 focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
@@ -49,12 +49,10 @@ fun HomeHeader(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 2. TRIGGER "QUÉ ESTÁS PENSANDO" + PLUMA
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Avatar por defecto (Icono de usuario vacío)
             Icon(
                 imageVector = Icons.Default.AccountCircle,
                 contentDescription = null,
@@ -64,14 +62,13 @@ fun HomeHeader(
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            // El "Botón" que parece Input
             Row(
                 modifier = Modifier
                     .weight(1f)
                     .height(40.dp)
                     .clip(RoundedCornerShape(20.dp))
                     .border(1.dp, Color.LightGray, RoundedCornerShape(20.dp))
-                    .clickable { onTriggerClick() } // Al hacer click abre el modal
+                    .clickable { onTriggerClick() } 
                     .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -82,7 +79,7 @@ fun HomeHeader(
                     color = Color.Gray
                 )
                 Icon(
-                    imageVector = Icons.Default.Edit, // Icono de Pluma/Editar
+                    imageVector = Icons.Default.Edit,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(18.dp)

@@ -6,5 +6,7 @@ data class Publication(
     val price: Double,
     val description: String,
     val imageUrl: String?,
-    val createdAt: String?
+    val createdAt: String?,
+    val city: String? = null,
+    val state: String? = null
 )

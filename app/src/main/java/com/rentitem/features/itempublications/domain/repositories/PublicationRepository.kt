@@ -11,5 +11,9 @@ interface PublicationRepository {
         price: Double,
         priceType: String,
         category: String,
-        imageFile: File
-    ): Result<Publication>}
+        imageFile: File,
+        location: String? = null
+    ): Result<Publication>
+
+    suspend fun deletePublication(id: Int): Result<Unit>
+}

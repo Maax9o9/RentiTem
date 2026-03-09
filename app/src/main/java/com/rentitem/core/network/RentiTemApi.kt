@@ -9,11 +9,7 @@ import com.rentitem.features.signup.data.datasources.remote.model.SignUpRequest
 import com.rentitem.features.signup.data.datasources.remote.model.SignUpResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import retrofit2.http.Body
-import retrofit2.http.GET
-import retrofit2.http.Multipart
-import retrofit2.http.POST
-import retrofit2.http.Part
+import retrofit2.http.*
 
 interface RentiTemApi {
     @POST("api/v1/auth/login")
@@ -33,6 +29,11 @@ interface RentiTemApi {
         @Part("price") price: RequestBody,
         @Part("price_type") priceType: RequestBody,
         @Part("category") category: RequestBody,
+        @Part("city") city: RequestBody?,
+        @Part("state") state: RequestBody?,
         @Part image: MultipartBody.Part
     ): CreateItemResponse
+
+    @DELETE("api/v1/items/{id}")
+    suspend fun deletePublication(@Path("id") id: Int): Unit
 }

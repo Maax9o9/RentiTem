@@ -1,16 +1,22 @@
 package com.rentitem.features.signup.presentation.viewmodels
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rentitem.features.signup.domain.usecases.SignUpUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
+
+data class SignUpFormState(
+    val name: String = "",
+    val email: String = "",
+    val password: String = "",
+    val phone: String = "",
+    val address: String = ""
+)
 
 class SignUpViewModel(
     private val signUpUseCase: SignUpUseCase
@@ -19,29 +25,22 @@ class SignUpViewModel(
     private val _uiState = MutableStateFlow<SignUpUiState>(SignUpUiState.Idle)
     val uiState: StateFlow<SignUpUiState> = _uiState.asStateFlow()
 
-    var name by mutableStateOf("")
-        private set
-    var email by mutableStateOf("")
-        private set
-    var password by mutableStateOf("")
-        private set
-    var phone by mutableStateOf("")
-        private set
-    var address by mutableStateOf("")
-        private set
+    private val _formState = MutableStateFlow(SignUpFormState())
+    val formState: StateFlow<SignUpFormState> = _formState.asStateFlow()
 
-    fun onNameChange(v: String) { name = v }
-    fun onEmailChange(v: String) { email = v }
-    fun onPasswordChange(v: String) { password = v }
-    fun onPhoneChange(v: String) { phone = v }
-    fun onAddressChange(v: String) { address = v }
+    fun onNameChange(v: String) { _formState.update { it.copy(name = v) } }
+    fun onEmailChange(v: String) { _formState.update { it.copy(email = v) } }
+    fun onPasswordChange(v: String) { _formState.update { it.copy(password = v) } }
+    fun onPhoneChange(v: String) { _formState.update { it.copy(phone = v) } }
+    fun onAddressChange(v: String) { _formState.update { it.copy(address = v) } }
 
     fun resetState() {
         _uiState.value = SignUpUiState.Idle
     }
 
     fun signUp() {
-        if (password.length < 8) {
+        val currentForm = _formState.value
+        if (currentForm.password.length < 8) {
             _uiState.value = SignUpUiState.Error("La contraseña debe tener al menos 8 caracteres.")
             return
         }
@@ -49,12 +48,12 @@ class SignUpViewModel(
         viewModelScope.launch {
             _uiState.value = SignUpUiState.Loading
             try {
-                val response = signUpUseCase(
-                    fullName = name,
-                    email = email,
-                    pass = password,
-                    phone = phone,
-                    address = address
+                signUpUseCase(
+                    fullName = currentForm.name,
+                    email = currentForm.email,
+                    pass = currentForm.password,
+                    phone = currentForm.phone,
+                    address = currentForm.address
                 )
                 _uiState.value = SignUpUiState.Success("¡Cuenta creada exitosamente!")
             } catch (e: HttpException) {
