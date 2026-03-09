@@ -8,7 +8,9 @@ import com.rentitem.core.di.AppContainer
 import com.rentitem.core.di.AppContainerImpl
 import com.rentitem.core.navigation.NavigationWrapper
 import com.rentitem.ui.theme.RentiTemTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private lateinit var appContainer: AppContainer
 

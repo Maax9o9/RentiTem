@@ -22,7 +22,8 @@ import androidx.compose.ui.unit.dp
 fun HomeHeader(
     searchText: String,
     onSearchChange: (String) -> Unit,
-    onTriggerClick: () -> Unit
+    onTriggerClick: () -> Unit,
+    onProfileClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -53,12 +54,17 @@ fun HomeHeader(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Default.AccountCircle,
-                contentDescription = null,
-                modifier = Modifier.size(40.dp),
-                tint = Color.Gray
-            )
+            IconButton(
+                onClick = onProfileClick,
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.AccountCircle,
+                    contentDescription = "Ver Perfil",
+                    modifier = Modifier.fillMaxSize(),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
 
             Spacer(modifier = Modifier.width(12.dp))
 

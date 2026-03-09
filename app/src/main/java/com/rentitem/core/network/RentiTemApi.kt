@@ -5,6 +5,8 @@ import com.rentitem.features.itempublications.data.datasources.remote.model.Crea
 import com.rentitem.features.itempublications.data.datasources.remote.model.PublicationDto
 import com.rentitem.features.login.data.datasources.remote.model.LoginRequest
 import com.rentitem.features.login.data.datasources.remote.model.LoginResponse
+import com.rentitem.features.profileInfo.data.datasources.remote.model.UpdateProfileRequest
+import com.rentitem.features.profileInfo.data.datasources.remote.model.UserProfileDto
 import com.rentitem.features.signup.data.datasources.remote.model.SignUpRequest
 import com.rentitem.features.signup.data.datasources.remote.model.SignUpResponse
 import okhttp3.MultipartBody
@@ -36,4 +38,10 @@ interface RentiTemApi {
 
     @DELETE("api/v1/items/{id}")
     suspend fun deletePublication(@Path("id") id: Int): Unit
+
+    @GET("api/v1/users/me")
+    suspend fun getCurrentUser(): UserProfileDto
+
+    @PUT("api/v1/users/me")
+    suspend fun updateCurrentUser(@Body request: UpdateProfileRequest): UserProfileDto
 }

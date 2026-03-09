@@ -9,11 +9,17 @@ import com.rentitem.features.itempublications.di.PublicationModule
 import com.rentitem.features.itempublications.presentation.screens.PublicationsScreen
 import com.rentitem.features.itempublications.presentation.viewmodels.PublicationsViewModel
 
-fun NavGraphBuilder.itemPublicationsScreen(appContainer: AppContainer) {
+fun NavGraphBuilder.itemPublicationsScreen(
+    appContainer: AppContainer,
+    onNavigateToProfile: () -> Unit
+) {
     composable<Screen.Publications> {
         val viewModel: PublicationsViewModel = viewModel(
             factory = PublicationModule.provideFactory(appContainer)
         )
-        PublicationsScreen(viewModel = viewModel)
+        PublicationsScreen(
+            viewModel = viewModel,
+            onProfileClick = onNavigateToProfile
+        )
     }
 }

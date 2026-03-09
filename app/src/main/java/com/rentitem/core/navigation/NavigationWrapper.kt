@@ -6,6 +6,7 @@ import androidx.navigation.compose.rememberNavController
 import com.rentitem.core.di.AppContainer
 import com.rentitem.features.itempublications.navigation.itemPublicationsScreen
 import com.rentitem.features.login.navigation.loginScreen
+import com.rentitem.features.profileInfo.navigation.profileScreen
 import com.rentitem.features.signup.navigation.signUpScreen
 
 @Composable
@@ -25,6 +26,12 @@ fun NavigationWrapper(appContainer: AppContainer) {
             appContainer = appContainer,
             onNavigateBack = { navController.popBackStack() }
         )
-        itemPublicationsScreen(appContainer = appContainer)
+        itemPublicationsScreen(
+            appContainer = appContainer,
+            onNavigateToProfile = { navController.navigate(Screen.Profile) }
+        )
+        profileScreen(
+            onBack = { navController.popBackStack() }
+        )
     }
 }

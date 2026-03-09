@@ -20,7 +20,8 @@ import com.rentitem.features.itempublications.presentation.viewmodels.Publicatio
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PublicationsScreen(
-    viewModel: PublicationsViewModel
+    viewModel: PublicationsViewModel,
+    onProfileClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val formState by viewModel.formState.collectAsStateWithLifecycle()
@@ -46,7 +47,8 @@ fun PublicationsScreen(
             HomeHeader(
                 searchText = formState.searchText,
                 onSearchChange = { viewModel.onSearchChange(it) },
-                onTriggerClick = { showModal = true }
+                onTriggerClick = { showModal = true },
+                onProfileClick = onProfileClick
             )
 
             Box(modifier = Modifier.fillMaxSize()) {
