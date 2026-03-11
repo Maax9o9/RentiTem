@@ -16,6 +16,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Cameraswitch
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.FlashOff
+import androidx.compose.material.icons.rounded.FlashOn
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,8 +29,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -54,13 +56,12 @@ fun CameraScreen(
     )
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val flashEnabled by viewModel.flashEnabled.collectAsStateWithLifecycle()
     val cameraPermission = rememberPermissionState(Manifest.permission.CAMERA)
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    BackHandler {
-        onDismiss()
-    }
+    BackHandler { onDismiss() }
 
     LaunchedEffect(uiState) {
         if (uiState is CameraUiState.Success) {
@@ -89,9 +90,12 @@ fun CameraScreen(
             cameraPermission.status.isGranted -> {
                 CameraContent(
                     isCapturing = uiState is CameraUiState.Capturing,
+                    flashEnabled = flashEnabled,
                     onCapture = viewModel::capturePhoto,
+                    onToggleFlash = viewModel::toggleFlash,
                     onRegisterImageCapture = viewModel::registerImageCapture,
-                    onDismiss = onDismiss
+                    onDismiss = onDismiss,
+                    modifier = Modifier.fillMaxSize()
                 )
             }
             cameraPermission.status.shouldShowRationale -> {
@@ -119,13 +123,15 @@ fun CameraScreen(
     }
 }
 
-
 @Composable
 private fun CameraContent(
     isCapturing: Boolean,
+    flashEnabled: Boolean,
     onCapture: () -> Unit,
+    onToggleFlash: () -> Unit,
     onRegisterImageCapture: (ImageCapture) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -149,6 +155,10 @@ private fun CameraContent(
 
         val imageCapture = ImageCapture.Builder()
             .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+            .setFlashMode(
+                if (flashEnabled) ImageCapture.FLASH_MODE_ON
+                else ImageCapture.FLASH_MODE_OFF
+            )
             .build()
 
         onRegisterImageCapture(imageCapture)
@@ -163,10 +173,10 @@ private fun CameraContent(
     }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = modifier
             .background(Color.Black)
     ) {
+        // ✅ fillMaxSize propio — no hereda el modifier externo
         surfaceRequest?.let { request ->
             CameraXViewfinder(
                 surfaceRequest = request,
@@ -174,21 +184,51 @@ private fun CameraContent(
             )
         }
 
-
-        IconButton(
-            onClick = onDismiss,
+// Barra superior: cerrar + flash
+        Row(
             modifier = Modifier
                 .align(Alignment.TopStart)
-                .statusBarsPadding()
-                .padding(8.dp)
+                .fillMaxWidth()
+                .safeDrawingPadding() // Protege contra el notch y recortes de pantalla curvos
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .zIndex(1f), // Fuerza a la barra a dibujarse SOBRE la cámara
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = Icons.Rounded.Close,
-                contentDescription = "Cerrar cámara",
-                tint = Color.White
-            )
+            // Botón Cerrar
+            IconButton(
+                onClick = onDismiss,
+                // Agregamos un fondo circular semitransparente para garantizar contraste
+                modifier = Modifier.background(Color.Black.copy(alpha = 0.4f), CircleShape)
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Close,
+                    contentDescription = "Cerrar cámara",
+                    tint = Color.White
+                )
+            }
+
+            // Botón Flash
+            IconButton(
+                onClick = onToggleFlash,
+                enabled = !useFrontCamera,
+                modifier = Modifier.background(Color.Black.copy(alpha = 0.4f), CircleShape)
+            ) {
+                Icon(
+                    imageVector = if (flashEnabled) Icons.Rounded.FlashOn
+                    else Icons.Rounded.FlashOff,
+                    contentDescription = if (flashEnabled) "Flash encendido"
+                    else "Flash apagado",
+                    tint = when {
+                        flashEnabled    -> Color.Yellow
+                        useFrontCamera  -> Color.White.copy(alpha = 0.3f)
+                        else            -> Color.White
+                    }
+                )
+            }
         }
 
+        // Controles inferiores: captura + flip
         Row(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -198,8 +238,10 @@ private fun CameraContent(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Espaciador izquierdo para centrar el botón de captura
             Box(modifier = Modifier.size(48.dp))
 
+            // Botón de captura
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.size(80.dp)
@@ -229,6 +271,7 @@ private fun CameraContent(
                 }
             }
 
+            // Flip de cámara
             IconButton(
                 onClick = { useFrontCamera = !useFrontCamera },
                 enabled = !isCapturing
@@ -236,11 +279,11 @@ private fun CameraContent(
                 Icon(
                     imageVector = Icons.Rounded.Cameraswitch,
                     contentDescription = "Cambiar cámara",
-                    tint = if (isCapturing) Color.White.copy(alpha = 0.3f) else Color.White,
+                    tint = if (isCapturing) Color.White.copy(alpha = 0.3f)
+                    else Color.White,
                     modifier = Modifier.size(28.dp)
                 )
             }
         }
     }
 }
-

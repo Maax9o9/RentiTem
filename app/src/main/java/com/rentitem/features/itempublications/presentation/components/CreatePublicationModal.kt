@@ -1,7 +1,6 @@
 package com.rentitem.features.itempublications.presentation.components
 
 import android.Manifest
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -28,14 +27,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.rentitem.R
 import com.rentitem.core.hardware.domain.CameraManager
 import com.rentitem.core.ui.components.camera.CameraScreen
 import com.rentitem.features.itempublications.presentation.viewmodels.PublicationsViewModel
@@ -45,7 +42,8 @@ import com.rentitem.features.itempublications.presentation.viewmodels.Publicatio
 fun CreatePublicationModal(
     viewModel: PublicationsViewModel,
     onDismiss: () -> Unit,
-    cameraManager: CameraManager
+    cameraManager: CameraManager,
+    onCameraStateChange: (Boolean) -> Unit = {}
 ) {
     val context = LocalContext.current
     val formState by viewModel.formState.collectAsStateWithLifecycle()
@@ -70,6 +68,10 @@ fun CreatePublicationModal(
             formState.price.isNotBlank() &&
             formState.selectedImageUri != null
 
+    // Sincroniza el estado de la cámara con la pantalla principal
+    LaunchedEffect(formState.showCamera) {
+        onCameraStateChange(formState.showCamera)
+    }
 
     if (formState.showCamera) {
         CameraScreen(

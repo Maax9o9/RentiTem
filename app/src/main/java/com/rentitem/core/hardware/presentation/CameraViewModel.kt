@@ -20,6 +20,16 @@ class CameraViewModel(
     private val _uiState = MutableStateFlow<CameraUiState>(CameraUiState.Idle)
     val uiState: StateFlow<CameraUiState> = _uiState.asStateFlow()
 
+    private val _flashEnabled = MutableStateFlow(false)
+    val flashEnabled: StateFlow<Boolean> = _flashEnabled.asStateFlow()
+
+    fun toggleFlash() {
+        _flashEnabled.value = !_flashEnabled.value
+        (cameraManager as? AndroidCameraManager)?.imageCapture?.flashMode =
+            if (_flashEnabled.value) ImageCapture.FLASH_MODE_ON
+            else ImageCapture.FLASH_MODE_OFF
+    }
+
     fun registerImageCapture(imageCapture: ImageCapture) {
         (cameraManager as? AndroidCameraManager)?.imageCapture = imageCapture
     }
@@ -71,3 +81,4 @@ class CameraViewModel(
             }
     }
 }
+

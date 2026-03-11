@@ -1,4 +1,3 @@
-// core/hardware/presentation/CameraUiState.kt
 package com.rentitem.core.hardware.presentation
 
 import com.rentitem.core.hardware.domain.model.CapturedPhoto

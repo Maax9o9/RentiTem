@@ -29,20 +29,26 @@ fun PublicationsScreen(
     val formState by viewModel.formState.collectAsStateWithLifecycle()
     var showModal by remember { mutableStateOf(false) }
 
+    // Estado para saber si la cámara está activa y a pantalla completa
+    var isCameraOpen by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("RentiTem", style = MaterialTheme.typography.titleLarge) },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    titleContentColor = MaterialTheme.colorScheme.primary
+            // Ocultamos el TopAppBar si la cámara está abierta
+            if (!isCameraOpen) {
+                TopAppBar(
+                    title = { Text("RentiTem", style = MaterialTheme.typography.titleLarge) },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        titleContentColor = MaterialTheme.colorScheme.primary
+                    )
                 )
-            )
+            }
         }
     ) { padding ->
         Column(
             modifier = Modifier
-                .padding(padding)
+                .padding(padding) // Automáticamente será 0 si el TopAppBar desaparece
                 .fillMaxSize()
                 .background(Color.LightGray.copy(alpha = 0.2f))
         ) {
@@ -106,7 +112,8 @@ fun PublicationsScreen(
             CreatePublicationModal(
                 viewModel = viewModel,
                 onDismiss = { showModal = false },
-                cameraManager = cameraManager
+                cameraManager = cameraManager,
+                onCameraStateChange = { isOpen -> isCameraOpen = isOpen }
             )
         }
     }
