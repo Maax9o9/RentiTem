@@ -17,5 +17,5 @@ data class CreatePublicationFormState(
     val category: String = "Herramientas",
     val selectedImageUri: Uri? = null,
     val isFormLoading: Boolean = false,
-    val formError: String? = null
+    val showCamera: Boolean = false
 )

@@ -1,9 +1,11 @@
 package com.rentitem.core.di
 
 import android.content.Context
+import com.rentitem.core.hardware.domain.CameraManager
 import com.rentitem.core.hardware.domain.GpsManager
 import com.rentitem.core.network.AuthInterceptor
 import com.rentitem.core.network.RentiTemApi
+import com.rentitem.core.storage.TokenManager
 import com.rentitem.features.itempublications.data.repositories.PublicationRepositoryImpl
 import com.rentitem.features.itempublications.domain.repositories.PublicationRepository
 import com.rentitem.features.login.data.repositories.LoginRepositoryImpl
@@ -16,16 +18,16 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
-import com.rentitem.core.storage.TokenManager
 
 interface AppContainer {
     val loginRepository: LoginRepository
     val signUpRepository: SignUpRepository
     val publicationRepository: PublicationRepository
     val gpsManager: GpsManager
+    val cameraManager: CameraManager
 }
 
-class AppContainerImpl (private val context: Context) : AppContainer {
+class AppContainerImpl(private val context: Context) : AppContainer {
     private val baseUrl = "https://codigoverse.space/"
 
     private val hardwareModule = HardwareModule(context)
@@ -49,6 +51,7 @@ class AppContainerImpl (private val context: Context) : AppContainer {
         .addInterceptor(loggingInterceptor)
         .addInterceptor(authInterceptor)
         .build()
+
     private val retrofit: Retrofit = Retrofit.Builder()
         .baseUrl(baseUrl)
         .client(client)
@@ -73,5 +76,9 @@ class AppContainerImpl (private val context: Context) : AppContainer {
 
     override val gpsManager: GpsManager by lazy {
         hardwareModule.gpsManager
+    }
+
+    override val cameraManager: CameraManager by lazy {     // ← NUEVO
+        hardwareModule.cameraManager
     }
 }

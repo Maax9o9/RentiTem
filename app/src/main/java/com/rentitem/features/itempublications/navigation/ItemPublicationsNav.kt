@@ -19,7 +19,8 @@ fun NavGraphBuilder.itemPublicationsScreen(
         )
         PublicationsScreen(
             viewModel = viewModel,
-            onProfileClick = onNavigateToProfile
+            onProfileClick = onNavigateToProfile,
+            cameraManager = appContainer.cameraManager
         )
     }
 }

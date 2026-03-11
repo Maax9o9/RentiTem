@@ -1,13 +1,11 @@
 package com.rentitem.features.itempublications.presentation.components
 
 import android.Manifest
-import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -21,6 +19,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.rounded.Cameraswitch
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,19 +28,24 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.rentitem.R
+import com.rentitem.core.hardware.domain.CameraManager
+import com.rentitem.core.ui.components.camera.CameraScreen
 import com.rentitem.features.itempublications.presentation.viewmodels.PublicationsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreatePublicationModal(
     viewModel: PublicationsViewModel,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    cameraManager: CameraManager
 ) {
     val context = LocalContext.current
     val formState by viewModel.formState.collectAsStateWithLifecycle()
@@ -65,6 +69,16 @@ fun CreatePublicationModal(
             formState.description.isNotBlank() &&
             formState.price.isNotBlank() &&
             formState.selectedImageUri != null
+
+
+    if (formState.showCamera) {
+        CameraScreen(
+            onPhotoCaptured = viewModel::onPhotoCaptured,
+            onDismiss = viewModel::onCameraDismissed,
+            cameraManager = cameraManager
+        )
+        return
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -150,7 +164,6 @@ fun CreatePublicationModal(
                     .verticalScroll(scrollState)
                     .padding(horizontal = 20.dp, vertical = 16.dp)
             ) {
-
                 OutlinedTextField(
                     value = formState.title,
                     onValueChange = { viewModel.onTitleChange(it) },
@@ -312,6 +325,15 @@ fun CreatePublicationModal(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Row {
+                            IconButton(onClick = { viewModel.onOpenCamera() }) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Cameraswitch,
+                                    contentDescription = "Cambiar de cámara",
+                                    tint = Color(0xFF1E88E5),
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+
                             IconButton(onClick = {
                                 photoPickerLauncher.launch(
                                     PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
@@ -323,6 +345,7 @@ fun CreatePublicationModal(
                                     tint = Color(0xFF43A047)
                                 )
                             }
+
                             IconButton(onClick = {
                                 permissionLauncher.launch(
                                     arrayOf(

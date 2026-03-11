@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.rentitem.core.hardware.domain.CameraManager
 import com.rentitem.features.itempublications.presentation.components.CreatePublicationModal
 import com.rentitem.features.itempublications.presentation.components.HomeHeader
 import com.rentitem.features.itempublications.presentation.components.PublicationCard
@@ -21,7 +22,8 @@ import com.rentitem.features.itempublications.presentation.viewmodels.Publicatio
 @Composable
 fun PublicationsScreen(
     viewModel: PublicationsViewModel,
-    onProfileClick: () -> Unit
+    onProfileClick: () -> Unit,
+    cameraManager: CameraManager
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val formState by viewModel.formState.collectAsStateWithLifecycle()
@@ -80,7 +82,9 @@ fun PublicationsScreen(
                     }
                     is PublicationsUiState.Error -> {
                         Column(
-                            modifier = Modifier.align(Alignment.Center).padding(16.dp),
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .padding(16.dp),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
@@ -101,7 +105,8 @@ fun PublicationsScreen(
         if (showModal) {
             CreatePublicationModal(
                 viewModel = viewModel,
-                onDismiss = { showModal = false }
+                onDismiss = { showModal = false },
+                cameraManager = cameraManager
             )
         }
     }

@@ -31,7 +31,8 @@ data class PublicationFormState(
     val searchText: String = "",
     val isPriceTypeMenuExpanded: Boolean = false,
     val locationName: String = "",
-    val isLocationLoading: Boolean = false
+    val isLocationLoading: Boolean = false,
+    val showCamera: Boolean = false
 )
 
 class PublicationsViewModel(
@@ -49,11 +50,9 @@ class PublicationsViewModel(
 
     fun onTitleChange(v: String) { _formState.update { it.copy(title = v) } }
     fun onDescriptionChange(v: String) { _formState.update { it.copy(description = v) } }
-    
-    fun onPriceChange(v: String) { 
-        // Solo permite números y un punto decimal
+
+    fun onPriceChange(v: String) {
         val filtered = v.filter { it.isDigit() || it == '.' }
-        // Evita más de un punto decimal
         if (filtered.count { it == '.' } <= 1) {
             _formState.update { it.copy(price = filtered) }
         }
@@ -64,6 +63,23 @@ class PublicationsViewModel(
     fun onImageSelected(uri: Uri?) { _formState.update { it.copy(selectedImageUri = uri) } }
     fun onSearchChange(v: String) { _formState.update { it.copy(searchText = v) } }
     fun onPriceTypeMenuToggle(expanded: Boolean) { _formState.update { it.copy(isPriceTypeMenuExpanded = expanded) } }
+
+    fun onOpenCamera() {
+        _formState.update { it.copy(showCamera = true) }
+    }
+
+    fun onPhotoCaptured(uri: String) {
+        _formState.update {
+            it.copy(
+                selectedImageUri = Uri.parse(uri),
+                showCamera = false
+            )
+        }
+    }
+
+    fun onCameraDismissed() {
+        _formState.update { it.copy(showCamera = false) }
+    }
 
     init {
         loadPublications()
@@ -126,7 +142,7 @@ class PublicationsViewModel(
                 priceType = currentForm.priceType,
                 category = currentForm.category,
                 imageFile = imageFile,
-                location = currentForm.locationName // Se pasa la ubicación al caso de uso
+                location = currentForm.locationName
             )
                 .onSuccess {
                     loadPublications()

@@ -17,13 +17,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
+import com.rentitem.core.hardware.domain.CameraManager
 import com.rentitem.core.hardware.presentation.CameraUiState
 import com.rentitem.core.hardware.presentation.CameraViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,13 +35,16 @@ import kotlinx.coroutines.launch
 fun CameraScreen(
     onPhotoCaptured: (uri: String) -> Unit,
     onDismiss: () -> Unit,
-    viewModel: CameraViewModel = hiltViewModel()
+    cameraManager: CameraManager
 ) {
+    val viewModel: CameraViewModel = viewModel(
+        factory = CameraViewModel.provideFactory(cameraManager)
+    )
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val cameraPermission = rememberPermissionState(Manifest.permission.CAMERA)
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
-
 
     LaunchedEffect(uiState) {
         if (uiState is CameraUiState.Success) {
@@ -74,14 +78,12 @@ fun CameraScreen(
                     onDismiss = onDismiss
                 )
             }
-
             cameraPermission.status.shouldShowRationale -> {
                 CameraPermissionRationale(
                     onRequest = { cameraPermission.launchPermissionRequest() },
                     onDismiss = onDismiss
                 )
             }
-
             else -> {
                 LaunchedEffect(Unit) {
                     cameraPermission.launchPermissionRequest()
@@ -110,11 +112,8 @@ private fun CameraContent(
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-
-
     val surfaceRequests = remember { MutableStateFlow<SurfaceRequest?>(null) }
     val surfaceRequest by surfaceRequests.collectAsStateWithLifecycle()
-
     var useFrontCamera by remember { mutableStateOf(false) }
 
     val cameraSelector = remember(useFrontCamera) {
@@ -146,8 +145,11 @@ private fun CameraContent(
         )
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+    ) {
         surfaceRequest?.let { request ->
             CameraXViewfinder(
                 surfaceRequest = request,
