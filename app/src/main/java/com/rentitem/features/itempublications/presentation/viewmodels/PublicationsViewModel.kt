@@ -32,8 +32,11 @@ data class PublicationFormState(
     val isPriceTypeMenuExpanded: Boolean = false,
     val locationName: String = "",
     val isLocationLoading: Boolean = false,
-    val showCamera: Boolean = false
+    val showCamera: Boolean = false,
+    val latitude: Double? = null,
+    val longitude: Double? = null
 )
+
 
 class PublicationsViewModel(
     private val getPublicationsUseCase: GetPublicationsUseCase,
@@ -103,12 +106,27 @@ class PublicationsViewModel(
             val location = gpsManager.getCurrentLocation()
             if (location != null) {
                 val address = getAddressFromLocation(context, location.latitude, location.longitude)
-                _formState.update { it.copy(locationName = address, isLocationLoading = false) }
+                _formState.update {
+                    it.copy(
+                        locationName = address,
+                        isLocationLoading = false,
+                        latitude = location.latitude,
+                        longitude = location.longitude
+                    )
+                }
             } else {
-                _formState.update { it.copy(isLocationLoading = false, locationName = "Ubicación no disponible") }
+                _formState.update {
+                    it.copy(
+                        isLocationLoading = false,
+                        locationName = "Ubicación no disponible",
+                        latitude = null,
+                        longitude = null
+                    )
+                }
             }
         }
     }
+
 
     private suspend fun getAddressFromLocation(context: Context, lat: Double, lng: Double): String = withContext(Dispatchers.IO) {
         try {
@@ -142,7 +160,9 @@ class PublicationsViewModel(
                 priceType = currentForm.priceType,
                 category = currentForm.category,
                 imageFile = imageFile,
-                location = currentForm.locationName
+                location = currentForm.locationName,
+                latitude = currentForm.latitude,
+                longitude = currentForm.longitude
             )
                 .onSuccess {
                     loadPublications()
@@ -155,6 +175,7 @@ class PublicationsViewModel(
             _formState.update { it.copy(isFormLoading = false) }
         }
     }
+
 
     fun deletePublication(id: Int) {
         viewModelScope.launch {

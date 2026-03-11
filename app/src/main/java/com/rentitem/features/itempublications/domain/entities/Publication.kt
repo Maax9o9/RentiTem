@@ -8,5 +8,7 @@ data class Publication(
     val imageUrl: String?,
     val createdAt: String?,
     val city: String? = null,
-    val state: String? = null
+    val state: String? = null,
+    val latitude: Double? = null,
+    val longitude: Double? = null
 )

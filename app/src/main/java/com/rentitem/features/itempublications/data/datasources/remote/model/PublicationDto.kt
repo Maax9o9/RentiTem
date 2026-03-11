@@ -13,7 +13,9 @@ data class PublicationDto(
     @SerialName("ImageURL") val imageUrl: String? = null,
     @SerialName("CreatedAt") val createdAt: String? = null,
     @SerialName("City") val city: String? = null,
-    @SerialName("State") val state: String? = null
+    @SerialName("State") val state: String? = null,
+    @SerialName("Latitude") val latitude: Double? = null,
+    @SerialName("Longitude") val longitude: Double? = null
 )
 
 @Serializable
@@ -33,7 +35,9 @@ data class CreateItemResponse(
     @SerialName("ImageURL") val imageUrl: String? = null,
     @SerialName("CreatedAt") val createdAt: String? = null,
     @SerialName("City") val city: String? = null,
-    @SerialName("State") val state: String? = null
+    @SerialName("State") val state: String? = null,
+    @SerialName("Latitude") val latitude: Double? = null,
+    @SerialName("Longitude") val longitude: Double? = null
 )
 
 fun PublicationDto.toDomain(): Publication {
@@ -52,6 +56,8 @@ fun PublicationDto.toDomain(): Publication {
         },
         createdAt = createdAt,
         city = city,
-        state = state
+        state = state,
+        latitude = latitude,
+        longitude = longitude
     )
 }

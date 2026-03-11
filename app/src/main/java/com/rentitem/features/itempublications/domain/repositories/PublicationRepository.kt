@@ -12,7 +12,9 @@ interface PublicationRepository {
         priceType: String,
         category: String,
         imageFile: File,
-        location: String? = null
+        location: String? = null,
+        latitude: Double?,
+        longitude: Double?
     ): Result<Publication>
 
     suspend fun deletePublication(id: Int): Result<Unit>

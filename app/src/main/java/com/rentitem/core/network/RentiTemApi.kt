@@ -33,8 +33,11 @@ interface RentiTemApi {
         @Part("category") category: RequestBody,
         @Part("city") city: RequestBody?,
         @Part("state") state: RequestBody?,
+        @Part("latitude") latitude: RequestBody?,
+        @Part("longitude") longitude: RequestBody?,
         @Part image: MultipartBody.Part
     ): CreateItemResponse
+
 
     @DELETE("api/v1/items/{id}")
     suspend fun deletePublication(@Path("id") id: Int): Unit

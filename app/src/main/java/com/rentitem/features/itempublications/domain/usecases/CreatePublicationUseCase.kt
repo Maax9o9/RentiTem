@@ -13,10 +13,13 @@ class CreatePublicationUseCase(private val repository: PublicationRepository) {
         priceType: String,
         category: String,
         imageFile: File,
-        location: String? = null
+        location: String? = null,
+        latitude: Double? = null,
+        longitude: Double? = null
     ): Result<Publication> {
         return repository.createPublication(
-            title, description, price, priceType, category, imageFile, location
+            title, description, price, priceType, category, imageFile, location,
+            latitude, longitude
         )
     }
 }
