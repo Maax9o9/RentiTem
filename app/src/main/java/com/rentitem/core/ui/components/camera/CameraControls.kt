@@ -6,7 +6,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Cameraswitch
 import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -53,7 +52,6 @@ fun CameraBottomControls(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Espaciador izquierdo — mantiene el botón de captura centrado
         Box(modifier = Modifier.size(48.dp))
 
         CaptureButton(
@@ -61,7 +59,6 @@ fun CameraBottomControls(
             onClick = onCapture
         )
 
-        // Flip de cámara
         IconButton(
             onClick = onFlipCamera,
             enabled = !isCapturing
@@ -94,7 +91,6 @@ private fun CaptureButton(
                 modifier = Modifier.size(72.dp)
             )
         } else {
-            // Círculo blanco interior — el botón real
             Surface(
                 onClick = onClick,
                 shape = CircleShape,
@@ -102,7 +98,6 @@ private fun CaptureButton(
                 modifier = Modifier.size(68.dp)
             ) {}
 
-            // Anillo exterior — solo visual, estilo Google/Apple camera
             Box(
                 modifier = Modifier
                     .size(80.dp)

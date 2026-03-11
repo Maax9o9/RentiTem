@@ -1,6 +1,7 @@
 package com.rentitem.core.ui.components.camera
 
 import android.Manifest
+import androidx.activity.compose.BackHandler
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.Preview
@@ -9,14 +10,25 @@ import androidx.camera.compose.CameraXViewfinder
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.lifecycle.awaitInstance
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Cameraswitch
+import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -45,6 +57,10 @@ fun CameraScreen(
     val cameraPermission = rememberPermissionState(Manifest.permission.CAMERA)
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+
+    BackHandler {
+        onDismiss()
+    }
 
     LaunchedEffect(uiState) {
         if (uiState is CameraUiState.Success) {
@@ -103,6 +119,7 @@ fun CameraScreen(
     }
 }
 
+
 @Composable
 private fun CameraContent(
     isCapturing: Boolean,
@@ -157,16 +174,73 @@ private fun CameraContent(
             )
         }
 
-        CameraTopBar(
-            onDismiss = onDismiss,
-            modifier = Modifier.align(Alignment.TopCenter)
-        )
 
-        CameraBottomControls(
-            isCapturing = isCapturing,
-            onCapture = onCapture,
-            onFlipCamera = { useFrontCamera = !useFrontCamera },
-            modifier = Modifier.align(Alignment.BottomCenter)
-        )
+        IconButton(
+            onClick = onDismiss,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .statusBarsPadding()
+                .padding(8.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.Close,
+                contentDescription = "Cerrar cámara",
+                tint = Color.White
+            )
+        }
+
+        Row(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(bottom = 48.dp, start = 32.dp, end = 32.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(modifier = Modifier.size(48.dp))
+
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.size(80.dp)
+            ) {
+                if (isCapturing) {
+                    CircularProgressIndicator(
+                        color = Color.White,
+                        strokeWidth = 2.dp,
+                        modifier = Modifier.size(72.dp)
+                    )
+                } else {
+                    Surface(
+                        onClick = onCapture,
+                        shape = CircleShape,
+                        color = Color.White,
+                        modifier = Modifier.size(68.dp)
+                    ) {}
+                    Box(
+                        modifier = Modifier
+                            .size(80.dp)
+                            .border(
+                                width = 3.dp,
+                                color = Color.White,
+                                shape = CircleShape
+                            )
+                    )
+                }
+            }
+
+            IconButton(
+                onClick = { useFrontCamera = !useFrontCamera },
+                enabled = !isCapturing
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.Cameraswitch,
+                    contentDescription = "Cambiar cámara",
+                    tint = if (isCapturing) Color.White.copy(alpha = 0.3f) else Color.White,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+        }
     }
 }
+
