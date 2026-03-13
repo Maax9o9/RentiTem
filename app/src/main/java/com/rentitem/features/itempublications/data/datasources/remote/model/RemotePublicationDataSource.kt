@@ -7,8 +7,11 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class RemotePublicationDataSource(private val api: RentiTemApi) {
+@Singleton
+class RemotePublicationDataSource @Inject constructor(private val api: RentiTemApi) {
 
     suspend fun getPublications(): List<Publication> =
         api.getPublications().map { it.toDomain() }

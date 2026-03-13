@@ -2,6 +2,8 @@ package com.rentitem.core.di
 
 import android.content.Context
 import com.rentitem.core.database.AppDatabase
+import com.rentitem.core.hardware.data.AndroidCameraManager
+import com.rentitem.core.hardware.data.AndroidGpsManager
 import com.rentitem.core.hardware.domain.CameraManager
 import com.rentitem.core.hardware.domain.GpsManager
 import com.rentitem.core.network.AuthInterceptor
@@ -32,8 +34,6 @@ interface AppContainer {
 
 class AppContainerImpl(private val context: Context) : AppContainer {
     private val baseUrl = "https://codigoverse.space/"
-
-    private val hardwareModule = HardwareModule(context)
 
     private val tokenManager: TokenManager by lazy {
         TokenManager(context)
@@ -73,14 +73,14 @@ class AppContainerImpl(private val context: Context) : AppContainer {
         SignUpRepositoryImpl(api)
     }
 
-
     override val gpsManager: GpsManager by lazy {
-        hardwareModule.gpsManager
+        AndroidGpsManager(context)
     }
 
     override val cameraManager: CameraManager by lazy {
-        hardwareModule.cameraManager
+        AndroidCameraManager(context)
     }
+
     private val database: AppDatabase by lazy {
         AppDatabase.getInstance(context)
     }
@@ -96,5 +96,4 @@ class AppContainerImpl(private val context: Context) : AppContainer {
     override val publicationRepository: PublicationRepository by lazy {
         PublicationRepositoryImpl(remotePublicationDataSource, localPublicationDataSource)
     }
-
 }

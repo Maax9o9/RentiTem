@@ -1,12 +1,17 @@
-package com.rentitem.core.ui.screens
+package com.rentitem.core.navigation
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.Map
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -14,7 +19,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.rentitem.core.di.AppContainer
-import com.rentitem.core.navigation.Screen
 import com.rentitem.features.itempublications.di.PublicationModule
 import com.rentitem.features.itempublications.presentation.screens.PublicationsScreen
 import com.rentitem.features.itempublications.presentation.viewmodels.PublicationsViewModel
@@ -34,6 +38,13 @@ fun MainScreen(appContainer: AppContainer) {
     val navController = rememberNavController()
     val currentBackStack by navController.currentBackStackEntryAsState()
 
+    // ViewModel de publicaciones para observar el estado de la cámara
+    val publicationsViewModel: PublicationsViewModel = viewModel(
+        factory = PublicationModule.provideFactory(appContainer)
+    )
+    val formState by publicationsViewModel.formState.collectAsStateWithLifecycle()
+    val isCameraOpen = formState.showCamera
+
     val items = listOf(
         BottomNavItem(Screen.Publications, "Inicio", Icons.Rounded.Home),
         BottomNavItem(Screen.Map, "Mapa", Icons.Rounded.Map),
@@ -42,42 +53,43 @@ fun MainScreen(appContainer: AppContainer) {
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
-                items.forEach { item ->
-                    val isSelected = currentBackStack?.destination?.route
-                        ?.contains(item.route::class.simpleName ?: "") == true
+            // Solo mostramos la barra si la cámara NO está abierta
+            if (!isCameraOpen) {
+                NavigationBar {
+                    items.forEach { item ->
+                        val isSelected = currentBackStack?.destination?.route
+                            ?.contains(item.route::class.simpleName ?: "") == true
 
-                    NavigationBarItem(
-                        selected = isSelected,
-                        onClick = {
-                            navController.navigate(item.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+                        NavigationBarItem(
+                            selected = isSelected,
+                            onClick = {
+                                navController.navigate(item.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = item.icon,
-                                contentDescription = item.label
-                            )
-                        },
-                        label = { Text(item.label) }
-                    )
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = item.icon,
+                                    contentDescription = item.label
+                                )
+                            },
+                            label = { Text(item.label) }
+                        )
+                    }
                 }
             }
         }
     ) { padding ->
         NavHost(
             navController = navController,
-            startDestination = Screen.Publications
+            startDestination = Screen.Publications,
+            modifier = Modifier.padding(if (isCameraOpen) PaddingValues(0.dp) else padding)
         ) {
             composable<Screen.Publications> {
-                val publicationsViewModel: PublicationsViewModel = viewModel(
-                    factory = PublicationModule.provideFactory(appContainer)
-                )
                 PublicationsScreen(
                     viewModel = publicationsViewModel,
                     onProfileClick = {

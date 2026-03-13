@@ -62,7 +62,6 @@ fun MapScreen(viewModel: MapViewModel) {
                 is MapUiState.Success -> {
                     OsmMapView(
                         publications = state.publications,
-                        context = context,
                         modifier = Modifier.fillMaxSize()
                     )
                 }
@@ -95,7 +94,6 @@ fun MapScreen(viewModel: MapViewModel) {
 @Composable
 private fun OsmMapView(
     publications: List<Publication>,
-    context: Context,
     modifier: Modifier = Modifier
 ) {
     AndroidView(
@@ -105,9 +103,9 @@ private fun OsmMapView(
                 setMultiTouchControls(true)
                 controller.setZoom(12.0)
 
-                val first = publications.firstOrNull()
-                if (first?.latitude != null && first.longitude != null) {
-                    controller.setCenter(GeoPoint(first.latitude, first.longitude))
+                val first = publications.firstOrNull { it.latitude != null && it.longitude != null }
+                if (first != null) {
+                    controller.setCenter(GeoPoint(first.latitude!!, first.longitude!!))
                 } else {
                     controller.setCenter(GeoPoint(19.4326, -99.1332))
                 }

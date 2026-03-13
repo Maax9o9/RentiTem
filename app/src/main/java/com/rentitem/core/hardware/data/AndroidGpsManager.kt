@@ -8,11 +8,15 @@ import android.location.Location
 import android.location.LocationManager
 import androidx.core.content.ContextCompat
 import com.rentitem.core.hardware.domain.GpsManager
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class AndroidGpsManager(
-    private val context: Context
+@Singleton
+class AndroidGpsManager @Inject constructor(
+    @ApplicationContext private val context: Context
 ) : GpsManager {
 
     private val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager

@@ -9,6 +9,7 @@ import com.rentitem.core.hardware.domain.GpsManager
 import com.rentitem.features.itempublications.domain.usecases.CreatePublicationUseCase
 import com.rentitem.features.itempublications.domain.usecases.DeletePublicationUseCase
 import com.rentitem.features.itempublications.domain.usecases.GetPublicationsUseCase
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,6 +20,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import java.util.Locale
+import javax.inject.Inject
 
 data class PublicationFormState(
     val title: String = "",
@@ -37,8 +39,8 @@ data class PublicationFormState(
     val longitude: Double? = null
 )
 
-
-class PublicationsViewModel(
+@HiltViewModel
+class PublicationsViewModel @Inject constructor(
     private val getPublicationsUseCase: GetPublicationsUseCase,
     private val createPublicationUseCase: CreatePublicationUseCase,
     private val deletePublicationUseCase: DeletePublicationUseCase,

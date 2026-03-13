@@ -3,8 +3,11 @@ package com.rentitem.features.itempublications.domain.usecases
 import com.rentitem.features.itempublications.domain.entities.Publication
 import com.rentitem.features.itempublications.domain.repositories.PublicationRepository
 import java.io.File
+import javax.inject.Inject
 
-class CreatePublicationUseCase(private val repository: PublicationRepository) {
+class CreatePublicationUseCase @Inject constructor(
+    private val repository: PublicationRepository
+) {
 
     suspend operator fun invoke(
         title: String,

@@ -1,14 +1,14 @@
 package com.rentitem.core.ui.components.camera
 
 import android.Manifest
+import android.view.ViewGroup
 import androidx.activity.compose.BackHandler
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.Preview
-import androidx.camera.core.SurfaceRequest
-import androidx.camera.compose.CameraXViewfinder
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.lifecycle.awaitInstance
+import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -18,18 +18,14 @@ import androidx.compose.material.icons.rounded.Cameraswitch
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.FlashOff
 import androidx.compose.material.icons.rounded.FlashOn
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -41,7 +37,6 @@ import com.google.accompanist.permissions.shouldShowRationale
 import com.rentitem.core.hardware.domain.CameraManager
 import com.rentitem.core.hardware.presentation.CameraUiState
 import com.rentitem.core.hardware.presentation.CameraViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPermissionsApi::class)
@@ -135,8 +130,6 @@ private fun CameraContent(
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val surfaceRequests = remember { MutableStateFlow<SurfaceRequest?>(null) }
-    val surfaceRequest by surfaceRequests.collectAsStateWithLifecycle()
     var useFrontCamera by remember { mutableStateOf(false) }
 
     val cameraSelector = remember(useFrontCamera) {
@@ -144,13 +137,20 @@ private fun CameraContent(
         else CameraSelector.DEFAULT_BACK_CAMERA
     }
 
-    LaunchedEffect(cameraSelector) {
+    val previewView = remember {
+        PreviewView(context).apply {
+            layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        }
+    }
+
+    LaunchedEffect(cameraSelector, flashEnabled) {
         val provider = ProcessCameraProvider.awaitInstance(context)
 
         val preview = Preview.Builder().build().apply {
-            setSurfaceProvider { request ->
-                surfaceRequests.value = request
-            }
+            setSurfaceProvider(previewView.surfaceProvider)
         }
 
         val imageCapture = ImageCapture.Builder()
@@ -163,42 +163,40 @@ private fun CameraContent(
 
         onRegisterImageCapture(imageCapture)
 
-        provider.unbindAll()
-        provider.bindToLifecycle(
-            lifecycleOwner,
-            cameraSelector,
-            preview,
-            imageCapture
-        )
+        try {
+            provider.unbindAll()
+            provider.bindToLifecycle(
+                lifecycleOwner,
+                cameraSelector,
+                preview,
+                imageCapture
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     Box(
         modifier = modifier
             .background(Color.Black)
     ) {
-        // ✅ fillMaxSize propio — no hereda el modifier externo
-        surfaceRequest?.let { request ->
-            CameraXViewfinder(
-                surfaceRequest = request,
-                modifier = Modifier.fillMaxSize()
-            )
-        }
+        AndroidView(
+            factory = { previewView },
+            modifier = Modifier.fillMaxSize()
+        )
 
-// Barra superior: cerrar + flash
         Row(
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .fillMaxWidth()
-                .safeDrawingPadding() // Protege contra el notch y recortes de pantalla curvos
+                .statusBarsPadding()
                 .padding(horizontal = 16.dp, vertical = 8.dp)
-                .zIndex(1f), // Fuerza a la barra a dibujarse SOBRE la cámara
+                .zIndex(1f),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Botón Cerrar
             IconButton(
                 onClick = onDismiss,
-                // Agregamos un fondo circular semitransparente para garantizar contraste
                 modifier = Modifier.background(Color.Black.copy(alpha = 0.4f), CircleShape)
             ) {
                 Icon(
@@ -208,7 +206,6 @@ private fun CameraContent(
                 )
             }
 
-            // Botón Flash
             IconButton(
                 onClick = onToggleFlash,
                 enabled = !useFrontCamera,
@@ -228,7 +225,6 @@ private fun CameraContent(
             }
         }
 
-        // Controles inferiores: captura + flip
         Row(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -238,10 +234,8 @@ private fun CameraContent(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Espaciador izquierdo para centrar el botón de captura
             Box(modifier = Modifier.size(48.dp))
 
-            // Botón de captura
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.size(80.dp)
@@ -271,7 +265,6 @@ private fun CameraContent(
                 }
             }
 
-            // Flip de cámara
             IconButton(
                 onClick = { useFrontCamera = !useFrontCamera },
                 enabled = !isCapturing

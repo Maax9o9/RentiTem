@@ -3,8 +3,11 @@ package com.rentitem.features.itempublications.data.datasources.local
 import com.rentitem.features.itempublications.data.datasources.local.model.toDomain
 import com.rentitem.features.itempublications.data.datasources.local.model.toEntity
 import com.rentitem.features.itempublications.domain.entities.Publication
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class LocalPublicationDataSource(private val dao: PublicationDao) {
+@Singleton
+class LocalPublicationDataSource @Inject constructor(private val dao: PublicationDao) {
 
     companion object {
         private const val CACHE_TIMEOUT_MS = 5 * 60 * 1000L // 5 minutos
@@ -24,6 +27,10 @@ class LocalPublicationDataSource(private val dao: PublicationDao) {
 
     suspend fun deletePublication(id: Int) {
         dao.deleteById(id)
+    }
+
+    suspend fun clearCache() {
+        dao.clearAll()
     }
 
     suspend fun isCacheValid(): Boolean {

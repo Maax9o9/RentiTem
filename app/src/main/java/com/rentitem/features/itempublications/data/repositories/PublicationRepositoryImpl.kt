@@ -6,8 +6,11 @@ import com.rentitem.features.itempublications.data.datasources.remote.model.Remo
 import com.rentitem.features.itempublications.domain.entities.Publication
 import com.rentitem.features.itempublications.domain.repositories.PublicationRepository
 import java.io.File
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class PublicationRepositoryImpl(
+@Singleton
+class PublicationRepositoryImpl @Inject constructor(
     private val remote: RemotePublicationDataSource,
     private val local: LocalPublicationDataSource
 ) : PublicationRepository {
@@ -15,11 +18,12 @@ class PublicationRepositoryImpl(
     override suspend fun getPublications(): List<Publication> {
         if (local.isCacheValid()) {
             Log.d("REPO", "Cache válida — retornando local")
-            return local.getPublications()
+            val cached = local.getPublications()
+            if (cached.isNotEmpty()) return cached
         }
 
         return try {
-            Log.d("REPO", "Cache vencida — actualizando desde API")
+            Log.d("REPO", "Actualizando desde API...")
             val publications = remote.getPublications()
             local.savePublications(publications)
             publications
@@ -45,7 +49,8 @@ class PublicationRepositoryImpl(
                 title, description, price, priceType,
                 category, imageFile, location, latitude, longitude
             )
-            local.savePublication(publication)
+            // Invalida caché para forzar actualización
+            local.clearCache() 
             Result.success(publication)
         } catch (e: Exception) {
             Log.e("REPO", "Error al crear publicación: ${e.message}", e)
@@ -56,7 +61,7 @@ class PublicationRepositoryImpl(
     override suspend fun deletePublication(id: Int): Result<Unit> {
         return try {
             remote.deletePublication(id)
-            local.deletePublication(id)
+            local.clearCache()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

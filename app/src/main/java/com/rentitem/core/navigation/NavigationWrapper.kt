@@ -5,7 +5,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.rentitem.core.di.AppContainer
-import com.rentitem.core.ui.screens.MainScreen
 import com.rentitem.features.login.navigation.loginScreen
 import com.rentitem.features.signup.navigation.signUpScreen
 
