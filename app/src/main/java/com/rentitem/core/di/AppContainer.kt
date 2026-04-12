@@ -33,7 +33,7 @@ interface AppContainer {
 }
 
 class AppContainerImpl(private val context: Context) : AppContainer {
-    private val baseUrl = "https://codigoverse.space/"
+    private val baseUrl = "http://10.0.2.2:8080/"
 
     private val tokenManager: TokenManager by lazy {
         TokenManager(context)

@@ -14,9 +14,9 @@ data class UserDto(
 
 @Serializable
 data class SignUpRequest(
+    @SerialName("firebase_uid") val firebaseUid: String,
     @SerialName("full_name") val fullName: String,
     @SerialName("email") val email: String,
-    @SerialName("password") val password: String,
     @SerialName("phone") val phone: String,
     @SerialName("address") val address: String,
     @SerialName("role") val role: String
@@ -24,6 +24,5 @@ data class SignUpRequest(
 
 @Serializable
 data class SignUpResponse(
-    @SerialName("token") val token: String,
-    @SerialName("user") val user: UserDto? = null
+    @SerialName("message") val message: String
 )

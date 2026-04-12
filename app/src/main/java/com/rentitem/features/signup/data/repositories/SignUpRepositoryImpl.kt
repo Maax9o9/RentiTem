@@ -1,13 +1,17 @@
 package com.rentitem.features.signup.data.repositories
 
+import com.google.firebase.auth.FirebaseAuth
 import com.rentitem.core.network.RentiTemApi
 import com.rentitem.features.signup.data.datasources.remote.model.SignUpRequest
 import com.rentitem.features.signup.domain.entities.SignUpEntity
 import com.rentitem.features.signup.domain.repositories.SignUpRepository
+import kotlinx.coroutines.tasks.await
 
 class SignUpRepositoryImpl(
     private val api: RentiTemApi
 ) : SignUpRepository {
+    private val firebaseAuth = FirebaseAuth.getInstance()
+
     override suspend fun signUp(
         fullName: String,
         email: String,
@@ -15,23 +19,24 @@ class SignUpRepositoryImpl(
         phone: String,
         address: String
     ): SignUpEntity {
+        val authResult = firebaseAuth.createUserWithEmailAndPassword(email, pass).await()
+        val user = authResult.user ?: throw Exception("Error creating user in Firebase")
+
         val request = SignUpRequest(
+            firebaseUid = user.uid,
             fullName = fullName,
             email = email,
-            password = pass,
             phone = phone,
             address = address,
             role = "user"
         )
-        val response = api.signUp(request)
+        api.signUp(request)
         
-        // El error ocurría aquí porque se intentaba acceder a 'user' sin seguridad nula.
-        // Ahora usamos los datos de la respuesta si existen, o los del formulario como respaldo.
         return SignUpEntity(
-            fullName = response.user?.fullName ?: fullName,
-            email = response.user?.email ?: email,
-            phone = response.user?.phone ?: phone,
-            address = response.user?.address ?: address,
+            fullName = fullName,
+            email = email,
+            phone = phone,
+            address = address,
             message = "Registro exitoso"
         )
     }

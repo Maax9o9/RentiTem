@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1032074667761",
+    "project_id": "renitems-dd6bb",
+    "storage_bucket": "renitems-dd6bb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1032074667761:android:24d9fd620457e91d232b50",
+        "android_client_info": {
+          "package_name": "com.rentitem"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1032074667761-67p69t0vbj9693p5uo31uj7jbhui0g8n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwUgDY1UCiLCd2EVjUO3DcgshfrMruUGA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1032074667761-67p69t0vbj9693p5uo31uj7jbhui0g8n.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

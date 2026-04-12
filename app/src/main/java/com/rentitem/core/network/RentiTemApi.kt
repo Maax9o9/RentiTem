@@ -3,8 +3,7 @@ package com.rentitem.core.network
 import com.rentitem.features.itempublications.data.datasources.remote.model.CreateItemResponse
 import com.rentitem.features.itempublications.data.datasources.remote.model.CreatePublicationRequest
 import com.rentitem.features.itempublications.data.datasources.remote.model.PublicationDto
-import com.rentitem.features.login.data.datasources.remote.model.LoginRequest
-import com.rentitem.features.login.data.datasources.remote.model.LoginResponse
+import com.rentitem.features.login.data.datasources.remote.model.AuthSyncResponse
 import com.rentitem.features.profileInfo.data.datasources.remote.model.UpdateProfileRequest
 import com.rentitem.features.profileInfo.data.datasources.remote.model.UserProfileDto
 import com.rentitem.features.signup.data.datasources.remote.model.SignUpRequest
@@ -14,8 +13,8 @@ import okhttp3.RequestBody
 import retrofit2.http.*
 
 interface RentiTemApi {
-    @POST("api/v1/auth/login")
-    suspend fun login(@Body request: LoginRequest): LoginResponse
+    @GET("api/v1/auth/sync")
+    suspend fun syncUser(): AuthSyncResponse
 
     @POST("api/v1/auth/register")
     suspend fun signUp(@Body request: SignUpRequest): SignUpResponse
