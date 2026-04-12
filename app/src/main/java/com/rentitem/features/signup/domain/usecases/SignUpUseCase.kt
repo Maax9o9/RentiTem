@@ -18,4 +18,8 @@ class SignUpUseCase(
         }
         return repository.signUp(fullName, email, pass, phone, address)
     }
+
+    suspend fun withGoogle(idToken: String): SignUpEntity {
+        return repository.signUpWithGoogle(idToken)
+    }
 }

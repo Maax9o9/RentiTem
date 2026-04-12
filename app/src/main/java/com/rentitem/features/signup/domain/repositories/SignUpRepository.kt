@@ -10,4 +10,6 @@ interface SignUpRepository {
         phone: String,
         address: String
     ): SignUpEntity
+    
+    suspend fun signUpWithGoogle(idToken: String): SignUpEntity
 }

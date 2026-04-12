@@ -4,4 +4,5 @@ import com.rentitem.features.login.domain.entities.AuthEntity
 
 interface LoginRepository {
     suspend fun login(email: String, pass: String): AuthEntity
+    suspend fun loginWithGoogle(idToken: String): AuthEntity
 }

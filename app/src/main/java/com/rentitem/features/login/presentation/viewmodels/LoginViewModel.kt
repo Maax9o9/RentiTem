@@ -44,4 +44,16 @@ class LoginViewModel(
             }
         }
     }
+
+    fun loginWithGoogle(idToken: String) {
+        viewModelScope.launch {
+            _uiState.value = LoginUiState.Loading
+            try {
+                val response = loginUseCase.withGoogle(idToken)
+                _uiState.value = LoginUiState.Success(response.token)
+            } catch (e: Exception) {
+                _uiState.value = LoginUiState.Error(e.message ?: "Error al iniciar sesión con Google")
+            }
+        }
+    }
 }

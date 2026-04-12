@@ -68,4 +68,16 @@ class SignUpViewModel(
             }
         }
     }
+
+    fun signUpWithGoogle(idToken: String) {
+        viewModelScope.launch {
+            _uiState.value = SignUpUiState.Loading
+            try {
+                signUpUseCase.withGoogle(idToken)
+                _uiState.value = SignUpUiState.Success("¡Registro con Google exitoso!")
+            } catch (e: Exception) {
+                _uiState.value = SignUpUiState.Error(e.message ?: "Error desconocido")
+            }
+        }
+    }
 }

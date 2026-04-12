@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "1032074667761-hm54eocs786vva31j55b3gj36krja5nl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.rentitem",
+            "certificate_hash": "cff0d3564698cdd537c5f95b75bd9fcb76e6f51c"
+          }
+        },
+        {
           "client_id": "1032074667761-67p69t0vbj9693p5uo31uj7jbhui0g8n.apps.googleusercontent.com",
           "client_type": 3
         }

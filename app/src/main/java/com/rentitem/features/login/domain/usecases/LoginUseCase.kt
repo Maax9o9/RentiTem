@@ -9,4 +9,8 @@ class LoginUseCase(
     suspend operator fun invoke(email: String, pass: String): AuthEntity {
         return repository.login(email, pass)
     }
+    
+    suspend fun withGoogle(idToken: String): AuthEntity {
+        return repository.loginWithGoogle(idToken)
+    }
 }

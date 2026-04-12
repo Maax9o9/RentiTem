@@ -59,16 +59,16 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.extended)
-    
+
     // Navigation
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation.compose)
-    
+
     // Retrofit & Serialization
     implementation(libs.retrofit)
     implementation(libs.retrofit.kotlinx.serialization)
     implementation(libs.kotlinx.serialization.json)
-    
+
     // OkHttp & Logging
     implementation(libs.okhttp.logging)
 
@@ -92,7 +92,7 @@ dependencies {
 
     // Accompanist Permissions
     implementation(libs.accompanist.permissions)
-    
+
     // Osmdroid
     implementation(libs.osmdroid.android)
 
