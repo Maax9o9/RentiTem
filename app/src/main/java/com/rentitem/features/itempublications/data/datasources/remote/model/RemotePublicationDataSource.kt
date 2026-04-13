@@ -22,49 +22,48 @@ class RemotePublicationDataSource @Inject constructor(private val api: RentiTemA
         price: Double,
         priceType: String,
         category: String,
-        imageFile: File,
+        imageUrl: String,
         location: String?,
         latitude: Double?,
         longitude: Double?
     ): Publication {
-        val city: String?
-        val state: String?
+        val city: String
+        val state: String
         if (location != null && location.contains(",")) {
             val parts = location.split(",")
             city = parts[0].trim()
             state = if (parts.size > 1) parts[1].trim() else ""
         } else {
-            city = location
+            city = location ?: "Desconocida"
             state = ""
         }
 
-        val response = api.createPublication(
-            title.toRequestBody("text/plain".toMediaTypeOrNull()),
-            description.toRequestBody("text/plain".toMediaTypeOrNull()),
-            price.toString().toRequestBody("text/plain".toMediaTypeOrNull()),
-            priceType.toRequestBody("text/plain".toMediaTypeOrNull()),
-            category.toRequestBody("text/plain".toMediaTypeOrNull()),
-            city?.toRequestBody("text/plain".toMediaTypeOrNull()),
-            state?.toRequestBody("text/plain".toMediaTypeOrNull()),
-            latitude?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull()),
-            longitude?.toString()?.toRequestBody("text/plain".toMediaTypeOrNull()),
-            MultipartBody.Part.createFormData(
-                "image", imageFile.name,
-                imageFile.asRequestBody("image/*".toMediaTypeOrNull())
-            )
+        val request = CreatePublicationRequest(
+            title = title,
+            description = description,
+            price = price,
+            priceType = priceType,
+            category = category,
+            imageUrl = imageUrl,
+            city = city,
+            state = state,
+            latitude = latitude ?: 0.0,
+            longitude = longitude ?: 0.0
         )
+
+        val response = api.createPublication(request)
 
         val dto = response.item ?: PublicationDto(
             id = response.id ?: 0,
-            title = response.title ?: title,
-            price = response.price ?: price,
-            description = response.description ?: description,
-            imageUrl = response.imageUrl,
-            createdAt = response.createdAt,
-            city = response.city ?: city,
-            state = response.state ?: state,
-            latitude = response.latitude ?: latitude,
-            longitude = response.longitude ?: longitude
+            title = title,
+            price = price,
+            description = description,
+            imageUrl = imageUrl,
+            createdAt = null,
+            city = city,
+            state = state,
+            latitude = latitude,
+            longitude = longitude
         )
 
         return dto.toDomain()

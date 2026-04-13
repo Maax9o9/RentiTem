@@ -37,6 +37,9 @@ import com.rentitem.core.hardware.domain.CameraManager
 import com.rentitem.core.ui.components.camera.CameraScreen
 import com.rentitem.features.itempublications.presentation.viewmodels.PublicationsViewModel
 
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreatePublicationModal(
@@ -74,12 +77,21 @@ fun CreatePublicationModal(
     }
 
     if (formState.showCamera) {
-        CameraScreen(
-            onPhotoCaptured = viewModel::onPhotoCaptured,
-            onDismiss = viewModel::onCameraDismissed,
-            cameraManager = cameraManager
-        )
-        return
+        Dialog(
+            onDismissRequest = viewModel::onCameraDismissed,
+            properties = DialogProperties(
+                usePlatformDefaultWidth = false, // Permite pantalla completa real
+                dismissOnBackPress = true
+            )
+        ) {
+            Surface(modifier = Modifier.fillMaxSize()) {
+                CameraScreen(
+                    onPhotoCaptured = viewModel::onPhotoCaptured,
+                    onDismiss = viewModel::onCameraDismissed,
+                    cameraManager = cameraManager
+                )
+            }
+        }
     }
 
     ModalBottomSheet(

@@ -22,20 +22,8 @@ interface RentiTemApi {
     @GET("api/v1/items")
     suspend fun getPublications(): List<PublicationDto>
 
-    @Multipart
     @POST("api/v1/items")
-    suspend fun createPublication(
-        @Part("title") title: RequestBody,
-        @Part("description") description: RequestBody,
-        @Part("price") price: RequestBody,
-        @Part("price_type") priceType: RequestBody,
-        @Part("category") category: RequestBody,
-        @Part("city") city: RequestBody?,
-        @Part("state") state: RequestBody?,
-        @Part("latitude") latitude: RequestBody?,
-        @Part("longitude") longitude: RequestBody?,
-        @Part image: MultipartBody.Part
-    ): CreateItemResponse
+    suspend fun createPublication(@Body request: CreatePublicationRequest): CreateItemResponse
 
 
     @DELETE("api/v1/items/{id}")

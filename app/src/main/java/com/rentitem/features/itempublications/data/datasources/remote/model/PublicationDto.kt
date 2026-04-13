@@ -23,7 +23,14 @@ data class PublicationDto(
 data class CreatePublicationRequest(
     @SerialName("title") val title: String,
     @SerialName("description") val description: String,
-    @SerialName("price") val price: Double
+    @SerialName("price") val price: Double,
+    @SerialName("price_type") val priceType: String,
+    @SerialName("category") val category: String,
+    @SerialName("image_url") val imageUrl: String,
+    @SerialName("city") val city: String,
+    @SerialName("state") val state: String,
+    @SerialName("latitude") val latitude: Double,
+    @SerialName("longitude") val longitude: Double
 )
 
 @Serializable
