@@ -16,6 +16,7 @@ data class PublicationEntity(
     val state: String?,
     val latitude: Double?,
     val longitude: Double?,
+    val ownerProfilePic: String?,
     val cachedAt: Long = System.currentTimeMillis()
 )
 
@@ -23,12 +24,14 @@ fun PublicationEntity.toDomain(): Publication = Publication(
     id = id, title = title, price = price,
     description = description, imageUrl = imageUrl,
     createdAt = createdAt, city = city, state = state,
-    latitude = latitude, longitude = longitude
+    latitude = latitude, longitude = longitude,
+    ownerProfilePic = ownerProfilePic
 )
 
 fun Publication.toEntity(): PublicationEntity = PublicationEntity(
     id = id, title = title, price = price,
     description = description, imageUrl = imageUrl,
     createdAt = createdAt, city = city, state = state,
-    latitude = latitude, longitude = longitude
+    latitude = latitude, longitude = longitude,
+    ownerProfilePic = ownerProfilePic
 )

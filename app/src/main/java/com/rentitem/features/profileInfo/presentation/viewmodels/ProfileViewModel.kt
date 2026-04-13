@@ -16,6 +16,7 @@ data class ProfileFormState(
     val fullName: String = "",
     val phone: String = "",
     val address: String = "",
+    val profilePicUri: String? = null,
     val isUpdating: Boolean = false,
     val updateSuccess: Boolean = false,
     val updateError: String? = null
@@ -40,6 +41,7 @@ class ProfileViewModel @Inject constructor(
     fun onFullNameChange(v: String) { _formState.update { it.copy(fullName = v) } }
     fun onPhoneChange(v: String) { _formState.update { it.copy(phone = v) } }
     fun onAddressChange(v: String) { _formState.update { it.copy(address = v) } }
+    fun onProfilePicChange(uri: String?) { _formState.update { it.copy(profilePicUri = uri) } }
 
     fun loadProfile() {
         viewModelScope.launch {
@@ -47,11 +49,12 @@ class ProfileViewModel @Inject constructor(
             getProfileUseCase()
                 .onSuccess { profile ->
                     _uiState.value = ProfileUiState.Success(profile)
-                    _formState.update { 
+                    _formState.update {
                         it.copy(
                             fullName = profile.fullName,
                             phone = profile.phone,
-                            address = profile.address
+                            address = profile.address,
+                            profilePicUri = profile.profilePic
                         )
                     }
                 }
@@ -68,7 +71,8 @@ class ProfileViewModel @Inject constructor(
             updateProfileUseCase(
                 fullName = currentForm.fullName,
                 phone = currentForm.phone,
-                address = currentForm.address
+                address = currentForm.address,
+                profilePicUri = currentForm.profilePicUri
             ).onSuccess { updatedProfile ->
                 _uiState.value = ProfileUiState.Success(updatedProfile)
                 _formState.update { it.copy(isUpdating = false, updateSuccess = true) }
@@ -76,8 +80,7 @@ class ProfileViewModel @Inject constructor(
                 _formState.update { it.copy(isUpdating = false, updateError = error.message) }
             }
         }
-    }
-    
+    }    
     fun resetUpdateState() {
         _formState.update { it.copy(updateSuccess = false, updateError = null) }
     }

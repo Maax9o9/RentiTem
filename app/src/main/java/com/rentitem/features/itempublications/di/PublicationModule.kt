@@ -34,7 +34,8 @@ abstract class PublicationModule {
                         getPublicationsUseCase = GetPublicationsUseCase(appContainer.publicationRepository),
                         createPublicationUseCase = CreatePublicationUseCase(appContainer.publicationRepository),
                         deletePublicationUseCase = DeletePublicationUseCase(appContainer.publicationRepository),
-                        gpsManager = appContainer.gpsManager
+                        gpsManager = appContainer.gpsManager,
+                        getProfileUseCase = appContainer.getProfileUseCase
                     ) as T
                 }
             }

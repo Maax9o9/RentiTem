@@ -15,6 +15,9 @@ import com.rentitem.features.itempublications.data.repositories.PublicationRepos
 import com.rentitem.features.itempublications.domain.repositories.PublicationRepository
 import com.rentitem.features.login.data.repositories.LoginRepositoryImpl
 import com.rentitem.features.login.domain.repositories.LoginRepository
+import com.rentitem.features.profileInfo.data.repositories.ProfileRepositoryImpl
+import com.rentitem.features.profileInfo.domain.repositories.ProfileRepository
+import com.rentitem.features.profileInfo.domain.usecases.GetProfileUseCase
 import com.rentitem.features.signup.data.repositories.SignUpRepositoryImpl
 import com.rentitem.features.signup.domain.repositories.SignUpRepository
 import kotlinx.serialization.json.Json
@@ -30,6 +33,8 @@ interface AppContainer {
     val publicationRepository: PublicationRepository
     val gpsManager: GpsManager
     val cameraManager: CameraManager
+    val profileRepository: ProfileRepository
+    val getProfileUseCase: GetProfileUseCase
 }
 
 class AppContainerImpl(private val context: Context) : AppContainer {
@@ -95,5 +100,13 @@ class AppContainerImpl(private val context: Context) : AppContainer {
 
     override val publicationRepository: PublicationRepository by lazy {
         PublicationRepositoryImpl(remotePublicationDataSource, localPublicationDataSource)
+    }
+
+    override val profileRepository: ProfileRepository by lazy {
+        ProfileRepositoryImpl(api)
+    }
+
+    override val getProfileUseCase: GetProfileUseCase by lazy {
+        GetProfileUseCase(profileRepository)
     }
 }

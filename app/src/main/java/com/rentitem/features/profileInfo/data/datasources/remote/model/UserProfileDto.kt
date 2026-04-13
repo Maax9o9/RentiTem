@@ -12,11 +12,13 @@ data class UserProfileDto(
     @SerialName("address") val address: String? = null,
     @SerialName("phone") val phone: String? = null,
     @SerialName("profile_pic") val profilePic: String? = null,
-    @SerialName("role") val role: String
+    @SerialName("role") val role: String,
+    @SerialName("completion_percentage") val completionPercentage: Int = 100,
+    @SerialName("missing_fields") val missingFields: List<String> = emptyList()
 )
 
 fun UserProfileDto.toDomain(): UserProfile {
-    val baseUrl = "https://codigoverse.space/"
+    val baseUrl = "http://192.168.1.7:8080/"
     return UserProfile(
         id = id,
         fullName = fullName,
@@ -24,9 +26,13 @@ fun UserProfileDto.toDomain(): UserProfile {
         address = address ?: "",
         phone = phone ?: "",
         profilePic = if (!profilePic.isNullOrBlank()) {
-            val cleanPath = profilePic.removePrefix("/")
-            "$baseUrl$cleanPath"
+            if (profilePic.startsWith("http")) profilePic else {
+                val cleanPath = profilePic.removePrefix("/")
+                "$baseUrl$cleanPath"
+            }
         } else null,
-        role = role
+        role = role,
+        completionPercentage = completionPercentage,
+        missingFields = missingFields
     )
 }

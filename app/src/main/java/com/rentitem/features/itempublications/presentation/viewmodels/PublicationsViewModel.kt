@@ -9,7 +9,6 @@ import com.rentitem.core.hardware.domain.GpsManager
 import com.rentitem.features.itempublications.domain.usecases.CreatePublicationUseCase
 import com.rentitem.features.itempublications.domain.usecases.DeletePublicationUseCase
 import com.rentitem.features.itempublications.domain.usecases.GetPublicationsUseCase
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +19,8 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import java.util.Locale
-import javax.inject.Inject
+import com.rentitem.features.profileInfo.domain.usecases.GetProfileUseCase
+import com.rentitem.features.profileInfo.domain.entities.UserProfile
 
 data class PublicationFormState(
     val title: String = "",
@@ -39,12 +39,12 @@ data class PublicationFormState(
     val longitude: Double? = null
 )
 
-@HiltViewModel
-class PublicationsViewModel @Inject constructor(
+class PublicationsViewModel(
     private val getPublicationsUseCase: GetPublicationsUseCase,
     private val createPublicationUseCase: CreatePublicationUseCase,
     private val deletePublicationUseCase: DeletePublicationUseCase,
-    private val gpsManager: GpsManager
+    private val gpsManager: GpsManager,
+    private val getProfileUseCase: GetProfileUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<PublicationsUiState>(PublicationsUiState.Loading)
@@ -52,6 +52,9 @@ class PublicationsViewModel @Inject constructor(
 
     private val _formState = MutableStateFlow(PublicationFormState())
     val formState: StateFlow<PublicationFormState> = _formState.asStateFlow()
+    
+    private val _userProfile = MutableStateFlow<UserProfile?>(null)
+    val userProfile: StateFlow<UserProfile?> = _userProfile.asStateFlow()
 
     fun onTitleChange(v: String) { _formState.update { it.copy(title = v) } }
     fun onDescriptionChange(v: String) { _formState.update { it.copy(description = v) } }
@@ -88,6 +91,20 @@ class PublicationsViewModel @Inject constructor(
 
     init {
         loadPublications()
+        loadProfile()
+    }
+
+    fun loadProfile() {
+        viewModelScope.launch {
+            try {
+                val profileResult = getProfileUseCase()
+                profileResult.onSuccess {
+                    _userProfile.value = it
+                }
+            } catch (e: Exception) {
+                // Ignore
+            }
+        }
     }
 
     fun loadPublications() {

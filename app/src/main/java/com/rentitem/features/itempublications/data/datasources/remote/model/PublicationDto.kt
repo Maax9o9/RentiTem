@@ -15,7 +15,8 @@ data class PublicationDto(
     @SerialName("City") val city: String? = null,
     @SerialName("State") val state: String? = null,
     @SerialName("Latitude") val latitude: Double? = null,
-    @SerialName("Longitude") val longitude: Double? = null
+    @SerialName("Longitude") val longitude: Double? = null,
+    @SerialName("owner_profile_pic") val ownerProfilePic: String? = null
 )
 
 @Serializable
@@ -41,7 +42,7 @@ data class CreateItemResponse(
 )
 
 fun PublicationDto.toDomain(): Publication {
-    val baseUrl = "https://codigoverse.space/"
+    val baseUrl = "http://192.168.1.7:8080/"
 
     return Publication(
         id = id,
@@ -49,15 +50,21 @@ fun PublicationDto.toDomain(): Publication {
         price = price,
         description = description,
         imageUrl = if (!imageUrl.isNullOrBlank()) {
-            val cleanPath = imageUrl.removePrefix("/")
-            "$baseUrl$cleanPath"
-        } else {
-            null
-        },
+            if (imageUrl.startsWith("http")) imageUrl else {
+                val cleanPath = imageUrl.removePrefix("/")
+                "$baseUrl$cleanPath"
+            }
+        } else null,
         createdAt = createdAt,
         city = city,
         state = state,
         latitude = latitude,
-        longitude = longitude
+        longitude = longitude,
+        ownerProfilePic = if (!ownerProfilePic.isNullOrBlank()) {
+            if (ownerProfilePic.startsWith("http")) ownerProfilePic else {
+                val cleanPath = ownerProfilePic.removePrefix("/")
+                "$baseUrl$cleanPath"
+            }
+        } else null
     )
 }

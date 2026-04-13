@@ -10,5 +10,6 @@ data class Publication(
     val city: String? = null,
     val state: String? = null,
     val latitude: Double? = null,
-    val longitude: Double? = null
+    val longitude: Double? = null,
+    val ownerProfilePic: String? = null
 )
