@@ -2,6 +2,12 @@ package com.rentitem.features.chat.data.repositories
 
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import android.content.Context
+import androidx.work.Constraints
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import com.rentitem.features.chat.data.workers.SendMessageWorker
 import com.rentitem.features.chat.data.datasources.local.ChatDao
 import com.rentitem.features.chat.data.datasources.local.model.MessageEntity
 import com.rentitem.features.chat.data.datasources.remote.model.MessageDto
@@ -15,6 +21,7 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 
 class ChatRepositoryImpl(
+    private val context: Context,
     private val firestore: FirebaseFirestore,
     private val chatDao: ChatDao,
     private val currentUserId: String
@@ -88,6 +95,15 @@ class ChatRepositoryImpl(
             isPending = true
         )
         chatDao.insertMessage(tempEntity)
-        // En la tarea 4, se programará un WorkManager para tomar los mensajes isPending=true y subirlos 
+        
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+            
+        val uploadWorkRequest = OneTimeWorkRequestBuilder<SendMessageWorker>()
+            .setConstraints(constraints)
+            .build()
+            
+        WorkManager.getInstance(context).enqueue(uploadWorkRequest)
     }
 }
