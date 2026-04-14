@@ -16,7 +16,8 @@ data class PublicationDto(
     @SerialName("State") val state: String? = null,
     @SerialName("Latitude") val latitude: Double? = null,
     @SerialName("Longitude") val longitude: Double? = null,
-    @SerialName("OwnerProfilePic") val ownerProfilePic: String? = null
+    @SerialName("OwnerProfilePic") val ownerProfilePic: String? = null,
+    @SerialName("UserID") val userId: String? = null
 )
 
 @Serializable
@@ -72,6 +73,7 @@ fun PublicationDto.toDomain(): Publication {
                 val cleanPath = ownerProfilePic.removePrefix("/")
                 "$baseUrl$cleanPath"
             }
-        } else null
+        } else null,
+        userId = userId // Agregado UserId
     )
 }

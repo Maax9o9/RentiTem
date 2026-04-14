@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
@@ -27,7 +28,9 @@ import com.rentitem.features.itempublications.domain.entities.Publication
 @Composable
 fun PublicationCard(
     publication: Publication,
-    onDelete: (Int) -> Unit
+    currentUserId: String? = null,
+    onDelete: (Int) -> Unit,
+    onChatClick: (String, String) -> Unit = { _, _ -> }
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
@@ -222,6 +225,19 @@ fun PublicationCard(
                     overflow = TextOverflow.Ellipsis,
                     lineHeight = 20.sp
                 )
+
+                if (currentUserId != null && publication.userId != null && publication.userId != currentUserId) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = { onChatClick(publication.userId, publication.title) },
+                        modifier = Modifier.fillMaxWidth().height(48.dp),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Icon(Icons.Default.Chat, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Iniciar Chat")
+                    }
+                }
             }
         }
     }
