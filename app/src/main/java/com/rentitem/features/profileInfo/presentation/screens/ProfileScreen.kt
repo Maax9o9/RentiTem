@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
@@ -41,11 +42,18 @@ import com.rentitem.features.profileInfo.presentation.viewmodels.ProfileViewMode
 @Composable
 fun ProfileScreen(
     onBack: () -> Unit,
+    onLogoutSuccess: () -> Unit,
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val formState by viewModel.formState.collectAsStateWithLifecycle()
     var showEditDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(formState.isLoggedOut) {
+        if (formState.isLoggedOut) {
+            onLogoutSuccess()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -81,7 +89,8 @@ fun ProfileScreen(
                 is ProfileUiState.Success -> {
                     ProfileContent(
                         profile = state.profile,
-                        onEditClick = { showEditDialog = true }
+                        onEditClick = { showEditDialog = true },
+                        onLogoutClick = { viewModel.logout() }
                     )
                 }
                 is ProfileUiState.Error -> {
@@ -125,7 +134,8 @@ fun ProfileScreen(
 @Composable
 fun ProfileContent(
     profile: UserProfile,
-    onEditClick: () -> Unit
+    onEditClick: () -> Unit,
+    onLogoutClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -227,6 +237,29 @@ fun ProfileContent(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     "Editar Perfil",
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 15.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            OutlinedButton(
+                onClick = onLogoutClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ExitToApp,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    "Cerrar Sesión",
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 15.sp
                 )

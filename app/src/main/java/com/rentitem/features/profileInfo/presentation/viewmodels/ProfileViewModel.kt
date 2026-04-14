@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rentitem.features.profileInfo.domain.usecases.GetProfileUseCase
 import com.rentitem.features.profileInfo.domain.usecases.UpdateProfileUseCase
+import com.rentitem.features.profileInfo.domain.usecases.LogoutUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,13 +20,15 @@ data class ProfileFormState(
     val profilePicUri: String? = null,
     val isUpdating: Boolean = false,
     val updateSuccess: Boolean = false,
-    val updateError: String? = null
+    val updateError: String? = null,
+    val isLoggedOut: Boolean = false
 )
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val getProfileUseCase: GetProfileUseCase,
-    private val updateProfileUseCase: UpdateProfileUseCase
+    private val updateProfileUseCase: UpdateProfileUseCase,
+    private val logoutUseCase: LogoutUseCase
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Idle)
@@ -83,5 +86,10 @@ class ProfileViewModel @Inject constructor(
     }    
     fun resetUpdateState() {
         _formState.update { it.copy(updateSuccess = false, updateError = null) }
+    }
+
+    fun logout() {
+        logoutUseCase()
+        _formState.update { it.copy(isLoggedOut = true) }
     }
 }
