@@ -2,6 +2,9 @@ package com.rentitem.features.login.data.repositories
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
+import com.google.firebase.messaging.FirebaseMessaging
 import com.rentitem.core.network.RentiTemApi
 import com.rentitem.core.storage.TokenManager
 import com.rentitem.features.login.domain.entities.AuthEntity
@@ -36,11 +39,23 @@ class LoginRepositoryImpl(
         val token = tokenResult.token ?: throw Exception("Error getting Firebase token")
 
         tokenManager.saveToken(token)
+        tokenManager.saveUid(currentUser.uid)
 
         try {
             api.syncUser()
         } catch (e: Exception) {
             throw e
+        }
+
+        try {
+            val fcmToken = FirebaseMessaging.getInstance().token.await()
+            val db = FirebaseFirestore.getInstance()
+            val data = hashMapOf("fcmToken" to fcmToken, "uid" to currentUser.uid)
+            db.collection("users").document(currentUser.uid)
+                .set(data, SetOptions.merge())
+                .await()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
 
         return AuthEntity(email, token)

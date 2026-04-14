@@ -16,7 +16,7 @@ data class PublicationDto(
     @SerialName("State") val state: String? = null,
     @SerialName("Latitude") val latitude: Double? = null,
     @SerialName("Longitude") val longitude: Double? = null,
-    @SerialName("owner_profile_pic") val ownerProfilePic: String? = null
+    @SerialName("OwnerProfilePic") val ownerProfilePic: String? = null
 )
 
 @Serializable
@@ -49,7 +49,7 @@ data class CreateItemResponse(
 )
 
 fun PublicationDto.toDomain(): Publication {
-    val baseUrl = "http://192.168.1.7:8080/"
+    val baseUrl = "http://10.0.2.2:8080/"
 
     return Publication(
         id = id,

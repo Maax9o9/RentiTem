@@ -38,7 +38,7 @@ interface AppContainer {
 }
 
 class AppContainerImpl(private val context: Context) : AppContainer {
-    private val baseUrl = "http://192.168.1.7:8080/"
+    private val baseUrl = "http://10.0.2.2:8080/"
 
     private val tokenManager: TokenManager by lazy {
         TokenManager(context)
