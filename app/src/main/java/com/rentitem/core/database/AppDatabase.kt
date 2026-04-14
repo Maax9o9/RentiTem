@@ -6,14 +6,17 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.rentitem.features.itempublications.data.datasources.local.PublicationDao
 import com.rentitem.features.itempublications.data.datasources.local.model.PublicationEntity
+import com.rentitem.features.chat.data.datasources.local.ChatDao
+import com.rentitem.features.chat.data.datasources.local.model.MessageEntity
 
 @Database(
-    entities = [PublicationEntity::class],
-    version = 2,
+    entities = [PublicationEntity::class, MessageEntity::class],
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun publicationDao(): PublicationDao
+    abstract fun chatDao(): ChatDao
 
     companion object {
         @Volatile private var INSTANCE: AppDatabase? = null
