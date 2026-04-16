@@ -2,6 +2,7 @@ package com.rentitem.features.signup.data.repositories
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.firestore.FirebaseFirestore
 import com.rentitem.core.network.RentiTemApi
 import com.rentitem.core.storage.TokenManager
 import com.rentitem.features.signup.data.datasources.remote.model.SignUpRequest
@@ -11,9 +12,10 @@ import kotlinx.coroutines.tasks.await
 
 class SignUpRepositoryImpl(
     private val api: RentiTemApi,
-    private val tokenManager: TokenManager
+    private val tokenManager: TokenManager,
+    private val firebaseAuth: FirebaseAuth,
+    private val firestore: FirebaseFirestore
 ) : SignUpRepository {
-    private val firebaseAuth = FirebaseAuth.getInstance()
 
     override suspend fun signUp(
         fullName: String,
@@ -65,8 +67,7 @@ class SignUpRepositoryImpl(
             email = user.email ?: "",
             phone = "",
             address = "",
-            message = "Registro " +
-                    "con Google exitoso"
+            message = "Registro con Google exitoso"
         )
     }
 }

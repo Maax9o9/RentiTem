@@ -18,7 +18,7 @@ data class UserProfileDto(
 )
 
 fun UserProfileDto.toDomain(): UserProfile {
-    val baseUrl = "http://192.168.1.9:8080/"
+    val baseUrl = "http://172.20.10.3:8080/"
     return UserProfile(
         id = id,
         fullName = fullName,

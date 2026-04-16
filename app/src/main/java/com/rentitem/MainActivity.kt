@@ -29,14 +29,12 @@ class MainActivity : ComponentActivity() {
         
         appContainer = AppContainerImpl(this)
 
-        // Reparar TokenManager si falta el UID en sesiones persistentes
-        val currentUser = FirebaseAuth.getInstance().currentUser
+        val currentUser = appContainer.firebaseAuth.currentUser
         if (currentUser != null) {
             val uid = currentUser.uid
             if (appContainer.tokenManager.getUid() == null) {
                 appContainer.tokenManager.saveUid(uid)
             }
-            // Sincronizar Token FCM para asegurar notificaciones
             syncFcmToken(uid)
         }
         
@@ -51,10 +49,10 @@ class MainActivity : ComponentActivity() {
     private fun syncFcmToken(uid: String) {
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val token = FirebaseMessaging.getInstance().token.await()
-                val db = FirebaseFirestore.getInstance()
+                val token = appContainer.firebaseMessaging.token.await()
+                val firestore = appContainer.firestore
                 val data = hashMapOf("fcmToken" to token, "uid" to uid)
-                db.collection("users").document(uid).set(data, SetOptions.merge()).await()
+                firestore.collection("users").document(uid).set(data, SetOptions.merge()).await()
                 android.util.Log.d("FCM_SYNC", "Token sincronizado: $token")
             } catch (e: Exception) {
                 e.printStackTrace()

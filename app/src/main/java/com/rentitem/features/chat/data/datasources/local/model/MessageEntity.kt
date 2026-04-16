@@ -12,5 +12,5 @@ data class MessageEntity(
     val text: String,
     val createdAt: Long,
     val read: Boolean,
-    val isPending: Boolean = false // to track offline messages awaiting dispatch
+    val isPending: Boolean = false
 )

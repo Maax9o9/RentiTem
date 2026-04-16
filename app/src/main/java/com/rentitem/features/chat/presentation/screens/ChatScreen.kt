@@ -36,11 +36,9 @@ fun ChatScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var inputText by remember { mutableStateOf("") }
 
-    // Permiso de notificaciones para Android 13+
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
-        // Manejar el resultado si es necesario
     }
 
     LaunchedEffect(Unit) {

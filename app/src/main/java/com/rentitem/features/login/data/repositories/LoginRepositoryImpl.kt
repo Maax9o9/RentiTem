@@ -11,9 +11,13 @@ import com.rentitem.features.login.domain.entities.AuthEntity
 import com.rentitem.features.login.domain.repositories.LoginRepository
 import kotlinx.coroutines.tasks.await
 
-class LoginRepositoryImpl(private val api: RentiTemApi, private val tokenManager: TokenManager) :
-        LoginRepository {
-    private val firebaseAuth = FirebaseAuth.getInstance()
+class LoginRepositoryImpl(
+    private val api: RentiTemApi,
+    private val tokenManager: TokenManager,
+    private val firebaseAuth: FirebaseAuth,
+    private val firestore: FirebaseFirestore,
+    private val firebaseMessaging: FirebaseMessaging
+) : LoginRepository {
 
     override suspend fun login(email: String, pass: String): AuthEntity {
         val authResult = firebaseAuth.signInWithEmailAndPassword(email, pass).await()
@@ -46,10 +50,9 @@ class LoginRepositoryImpl(private val api: RentiTemApi, private val tokenManager
         }
 
         try {
-            val fcmToken = FirebaseMessaging.getInstance().token.await()
-            val db = FirebaseFirestore.getInstance()
+            val fcmToken = firebaseMessaging.token.await()
             val data = hashMapOf("fcmToken" to fcmToken, "uid" to currentUser.uid)
-            db.collection("users").document(currentUser.uid).set(data, SetOptions.merge()).await()
+            firestore.collection("users").document(currentUser.uid).set(data, SetOptions.merge()).await()
         } catch (e: Exception) {
             e.printStackTrace()
         }

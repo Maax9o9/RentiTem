@@ -14,8 +14,7 @@ import com.google.firebase.auth.FirebaseAuth
 fun NavigationWrapper(appContainer: AppContainer) {
     val navController = rememberNavController()
     
-    // Verificamos si ya hay una sesión activa en Firebase y tenemos token local
-    val currentUser = FirebaseAuth.getInstance().currentUser
+    val currentUser = appContainer.firebaseAuth.currentUser
     val hasLocalToken = appContainer.tokenManager.getToken() != null
     val startDestination = if (currentUser != null && hasLocalToken) Screen.Main else Screen.Login
 

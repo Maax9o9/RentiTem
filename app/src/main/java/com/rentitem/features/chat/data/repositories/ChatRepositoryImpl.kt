@@ -138,7 +138,6 @@ class ChatRepositoryImpl(
                 }
 
                 if (snapshot != null) {
-                    // Resetear contador de no leídos al entrar al chat
                     if (currentUserId.isNotEmpty()) {
                         firestore.collection("conversations")
                             .document(conversationId)

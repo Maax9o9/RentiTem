@@ -5,10 +5,11 @@ import com.rentitem.core.storage.TokenManager
 import javax.inject.Inject
 
 class LogoutUseCase @Inject constructor(
-    private val tokenManager: TokenManager
+    private val tokenManager: TokenManager,
+    private val firebaseAuth: FirebaseAuth
 ) {
     operator fun invoke() {
         tokenManager.clearSession()
-        FirebaseAuth.getInstance().signOut()
+        firebaseAuth.signOut()
     }
 }

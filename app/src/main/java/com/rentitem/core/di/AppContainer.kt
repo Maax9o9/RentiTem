@@ -27,6 +27,11 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.messaging.FirebaseMessaging
+
 interface AppContainer {
     val tokenManager: TokenManager
     val loginRepository: LoginRepository
@@ -36,10 +41,19 @@ interface AppContainer {
     val cameraManager: CameraManager
     val profileRepository: ProfileRepository
     val getProfileUseCase: GetProfileUseCase
+    val firebaseAuth: FirebaseAuth
+    val firestore: FirebaseFirestore
+    val firebaseStorage: FirebaseStorage
+    val firebaseMessaging: FirebaseMessaging
 }
 
 class AppContainerImpl(private val context: Context) : AppContainer {
-    private val baseUrl = "http://192.168.1.9:8080/"
+    private val baseUrl = "http://172.20.10.3:8080/"
+
+    override val firebaseAuth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
+    override val firestore: FirebaseFirestore by lazy { FirebaseFirestore.getInstance() }
+    override val firebaseStorage: FirebaseStorage by lazy { FirebaseStorage.getInstance() }
+    override val firebaseMessaging: FirebaseMessaging by lazy { FirebaseMessaging.getInstance() }
 
     override val tokenManager: TokenManager by lazy {
         TokenManager(context)
@@ -72,11 +86,11 @@ class AppContainerImpl(private val context: Context) : AppContainer {
     }
 
     override val loginRepository: LoginRepository by lazy {
-        LoginRepositoryImpl(api, tokenManager)
+        LoginRepositoryImpl(api, tokenManager, firebaseAuth, firestore, firebaseMessaging)
     }
 
     override val signUpRepository: SignUpRepository by lazy {
-        SignUpRepositoryImpl(api, tokenManager)
+        SignUpRepositoryImpl(api, tokenManager, firebaseAuth, firestore)
     }
 
     override val gpsManager: GpsManager by lazy {
@@ -100,11 +114,11 @@ class AppContainerImpl(private val context: Context) : AppContainer {
     }
 
     override val publicationRepository: PublicationRepository by lazy {
-        PublicationRepositoryImpl(remotePublicationDataSource, localPublicationDataSource)
+        PublicationRepositoryImpl(remotePublicationDataSource, localPublicationDataSource, firebaseStorage)
     }
 
     override val profileRepository: ProfileRepository by lazy {
-        ProfileRepositoryImpl(api)
+        ProfileRepositoryImpl(api, firebaseAuth, firebaseStorage)
     }
 
     override val getProfileUseCase: GetProfileUseCase by lazy {

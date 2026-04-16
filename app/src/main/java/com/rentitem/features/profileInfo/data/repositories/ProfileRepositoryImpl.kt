@@ -13,7 +13,9 @@ import java.util.UUID
 import javax.inject.Inject
 
 class ProfileRepositoryImpl @Inject constructor(
-    private val api: RentiTemApi
+    private val api: RentiTemApi,
+    private val firebaseAuth: FirebaseAuth,
+    private val firebaseStorage: FirebaseStorage
 ) : ProfileRepository {
 
     override suspend fun getProfile(): Result<UserProfile> {
@@ -30,8 +32,8 @@ class ProfileRepositoryImpl @Inject constructor(
             var downloadUrl: String? = profilePicUri
             
             if (profilePicUri != null && !profilePicUri.startsWith("http")) {
-                val uid = FirebaseAuth.getInstance().currentUser?.uid ?: UUID.randomUUID().toString()
-                val ref = FirebaseStorage.getInstance().reference.child("profiles/$uid/profile_pic.jpg")
+                val uid = firebaseAuth.currentUser?.uid ?: UUID.randomUUID().toString()
+                val ref = firebaseStorage.reference.child("profiles/$uid/profile_pic.jpg")
                 ref.putFile(Uri.parse(profilePicUri)).await()
                 downloadUrl = ref.downloadUrl.await().toString()
             }
@@ -40,16 +42,14 @@ class ProfileRepositoryImpl @Inject constructor(
             try {
                 api.updateCurrentUser(request)
             } catch (e: Exception) {
-                // Si el error es solo por parsing (porque el servidor devuelve un string/message)
-                // pero el código fue 200, lo tratamos como éxito.
+
             }
             
-            // Retornamos el perfil actualizado manualmente (Optimistic/Local)
-            // En una app real, aquí podrías re-consultar el perfil si quisieras estar 100% seguro
+
             val updatedProfile = UserProfile(
-                id = 0, // El ID no cambiará
+                id = 0,
                 fullName = fullName,
-                email = "", // Mantendremos el email actual en el ViewModel
+                email = "",
                 phone = phone,
                 address = address,
                 profilePic = downloadUrl,

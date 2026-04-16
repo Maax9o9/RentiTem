@@ -14,7 +14,8 @@ import java.util.UUID
 
 class PublicationRepositoryImpl(
     private val remote: RemotePublicationDataSource,
-    private val local: LocalPublicationDataSource
+    private val local: LocalPublicationDataSource,
+    private val firebaseStorage: FirebaseStorage
 ) : PublicationRepository {
 
     override suspend fun getPublications(): List<Publication> {
@@ -50,7 +51,7 @@ class PublicationRepositoryImpl(
             // 1. Upload to Firebase Storage
             val uid = FirebaseAuth.getInstance().currentUser?.uid ?: "anonymous"
             val fileName = "items/${uid}/${UUID.randomUUID()}.jpg"
-            val ref = FirebaseStorage.getInstance().reference.child(fileName)
+            val ref = firebaseStorage.reference.child(fileName)
             
             ref.putFile(Uri.fromFile(imageFile)).await()
             val imageUrl = ref.downloadUrl.await().toString()

@@ -29,7 +29,6 @@ class RentItemFirebaseMessagingService : FirebaseMessagingService() {
         val body = remoteMessage.notification?.body ?: data["body"] ?: "Tienes un nuevo mensaje"
         val profilePicUrl = data["profilePicUrl"]
 
-        // Hacer la carga de la imagen fuera del hilo principal usando Coroutinas (pero lanzando en IO)
         CoroutineScope(Dispatchers.IO).launch {
             var bitmap: Bitmap? = null
             if (!profilePicUrl.isNullOrEmpty()) {
@@ -72,8 +71,7 @@ class RentItemFirebaseMessagingService : FirebaseMessagingService() {
             .setContentIntent(pendingIntent)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
 
-        // Si tenemos la foto del remitente, la ponemos como LargeIcon (círculo pequeño)
-        // No usamos BigPictureStyle para que no se vea gigante
+
         if (bitmap != null) {
             notificationBuilder.setLargeIcon(bitmap)
         }
@@ -87,7 +85,6 @@ class RentItemFirebaseMessagingService : FirebaseMessagingService() {
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = "Muestra mensajes de chat con foto del remitente"
-                // Aquí podrías habilitar/deshabilitar vibración según el estado de la app
             }
             notificationManager.createNotificationChannel(channel)
         }
@@ -96,7 +93,6 @@ class RentItemFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     override fun onNewToken(token: String) {
-        // Ignoramos ya que nuestro login flow captura el token eficientemente.
         super.onNewToken(token)
     }
 }

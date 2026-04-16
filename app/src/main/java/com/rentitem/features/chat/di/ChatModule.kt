@@ -21,9 +21,9 @@ object ChatModule {
     @Singleton
     fun provideChatRepository(
         @ApplicationContext context: Context,
-        tokenManager: TokenManager
+        tokenManager: TokenManager,
+        firestore: FirebaseFirestore
     ): ChatRepository {
-        val firestore = FirebaseFirestore.getInstance()
         val chatDao = AppDatabase.getInstance(context).chatDao()
         
         return ChatRepositoryImpl(

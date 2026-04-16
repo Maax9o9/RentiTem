@@ -23,14 +23,12 @@ class SendMessageWorker(
             if (pendingMessages.isEmpty()) return Result.success()
 
             for (msg in pendingMessages) {
-                // 1. Asegurar que el documento de la conversación existe y actualizar metadata
                 val participants = msg.conversationId.split("_")
                 val convData = mutableMapOf<String, Any>(
                     "lastMessage" to msg.text,
                     "lastMessageTime" to com.google.firebase.Timestamp(java.util.Date(msg.createdAt))
                 )
                 
-                // Intentar recuperar participantes del ID si es posible
                 if (participants.size >= 2) {
                     convData["participants"] = participants
                 }
@@ -40,7 +38,6 @@ class SendMessageWorker(
                     .set(convData, SetOptions.merge())
                     .await()
 
-                // 2. Subir el mensaje a la subcolección
                 val messageData = hashMapOf(
                     "senderId" to msg.senderId,
                     "text" to msg.text,

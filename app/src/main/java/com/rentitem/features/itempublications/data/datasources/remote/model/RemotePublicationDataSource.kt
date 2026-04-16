@@ -8,7 +8,10 @@ import javax.inject.Singleton
 import kotlin.math.round
 
 @Singleton
-class RemotePublicationDataSource @Inject constructor(private val api: RentiTemApi) {
+class RemotePublicationDataSource @Inject constructor(
+    private val api: RentiTemApi,
+    private val firebaseAuth: FirebaseAuth
+) {
 
     suspend fun getPublications(): List<Publication> {
         val dtos = api.getPublications()
@@ -71,7 +74,7 @@ class RemotePublicationDataSource @Inject constructor(private val api: RentiTemA
             state = state,
             latitude = request.latitude,
             longitude = request.longitude,
-            userId = FirebaseAuth.getInstance().currentUser?.uid
+            userId = firebaseAuth.currentUser?.uid
         )
 
         return dto.toDomain()
