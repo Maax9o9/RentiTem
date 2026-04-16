@@ -110,7 +110,7 @@ class AppContainerImpl(private val context: Context) : AppContainer {
     }
 
     private val remotePublicationDataSource: RemotePublicationDataSource by lazy {
-        RemotePublicationDataSource(api)
+        RemotePublicationDataSource(api,firebaseAuth)
     }
 
     override val publicationRepository: PublicationRepository by lazy {
