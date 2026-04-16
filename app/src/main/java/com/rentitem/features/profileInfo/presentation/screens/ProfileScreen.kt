@@ -64,9 +64,13 @@ fun ProfileScreen(
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold)
                     )
                 },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                actions = {
+                    IconButton(onClick = { viewModel.logout() }) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ExitToApp,
+                            contentDescription = "Cerrar Sesión",
+                            tint = MaterialTheme.colorScheme.error
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -237,29 +241,6 @@ fun ProfileContent(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     "Editar Perfil",
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 15.sp
-                )
-            }
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            OutlinedButton(
-                onClick = onLogoutClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error)
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ExitToApp,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    "Cerrar Sesión",
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 15.sp
                 )

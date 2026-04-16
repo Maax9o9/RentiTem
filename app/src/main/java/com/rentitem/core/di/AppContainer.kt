@@ -28,6 +28,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 
 interface AppContainer {
+    val tokenManager: TokenManager
     val loginRepository: LoginRepository
     val signUpRepository: SignUpRepository
     val publicationRepository: PublicationRepository
@@ -38,9 +39,9 @@ interface AppContainer {
 }
 
 class AppContainerImpl(private val context: Context) : AppContainer {
-    private val baseUrl = "http://10.0.2.2:8080/"
+    private val baseUrl = "http://192.168.1.9:8080/"
 
-    private val tokenManager: TokenManager by lazy {
+    override val tokenManager: TokenManager by lazy {
         TokenManager(context)
     }
 

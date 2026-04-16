@@ -18,6 +18,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.rentitem.features.chat.presentation.screens.ChatScreen
+import com.rentitem.features.chat.presentation.viewmodels.ChatViewModel
+import com.rentitem.features.chat.presentation.screens.ChatListScreen
+import com.rentitem.features.chat.presentation.viewmodels.ChatListViewModel
 import com.rentitem.core.di.AppContainer
 import com.rentitem.features.itempublications.di.PublicationModule
 import com.rentitem.features.itempublications.presentation.screens.PublicationsScreen
@@ -34,7 +40,7 @@ data class BottomNavItem(
 )
 
 @Composable
-fun MainScreen(appContainer: AppContainer) {
+fun MainScreen(appContainer: AppContainer, onLogout: () -> Unit) {
     val navController = rememberNavController()
     val currentBackStack by navController.currentBackStackEntryAsState()
 
@@ -63,12 +69,14 @@ fun MainScreen(appContainer: AppContainer) {
                         NavigationBarItem(
                             selected = isSelected,
                             onClick = {
+                                if (isSelected) return@NavigationBarItem
+                                
                                 navController.navigate(item.route) {
                                     popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
+                                        saveState = false
                                     }
                                     launchSingleTop = true
-                                    restoreState = true
+                                    restoreState = false
                                 }
                             },
                             icon = {
@@ -92,6 +100,7 @@ fun MainScreen(appContainer: AppContainer) {
             composable<Screen.Publications> {
                 PublicationsScreen(
                     viewModel = publicationsViewModel,
+                    currentUserId = appContainer.tokenManager.getUid() ?: "",
                     onProfileClick = {
                         navController.navigate(Screen.Profile) {
                             popUpTo(navController.graph.findStartDestination().id) {
@@ -100,6 +109,14 @@ fun MainScreen(appContainer: AppContainer) {
                             launchSingleTop = true
                             restoreState = true
                         }
+                    },
+                    onChatClick = { userId, contactName ->  
+                        val myUid = appContainer.tokenManager.getUid() ?: ""
+                        val conversationId = if (myUid < userId) "${myUid}_$userId" else "${userId}_$myUid"
+                        navController.navigate(Screen.Chat(conversationId = conversationId, contactName = contactName))
+                    },
+                    onChatListClick = {
+                        navController.navigate(Screen.ChatList)
                     },
                     cameraManager = appContainer.cameraManager
                 )
@@ -113,7 +130,32 @@ fun MainScreen(appContainer: AppContainer) {
             }
 
             composable<Screen.Profile> {
-                ProfileScreen(onBack = { navController.popBackStack() })
+                ProfileScreen(
+                    onBack = { navController.popBackStack() },
+                    onLogoutSuccess = onLogout
+                )
+            }
+
+            composable<Screen.ChatList> {
+                val chatListViewModel: ChatListViewModel = hiltViewModel()
+                ChatListScreen(
+                    viewModel = chatListViewModel,
+                    onChatClick = { conversationId, contactName ->
+                        navController.navigate(Screen.Chat(conversationId = conversationId, contactName = contactName))
+                    },
+                    onBack = { navController.popBackStack() }
+                )
+            }
+
+            composable<Screen.Chat> { backStackEntry ->
+                val chatArgs = backStackEntry.toRoute<Screen.Chat>()
+                val chatViewModel: ChatViewModel = hiltViewModel()
+
+                ChatScreen(
+                    viewModel = chatViewModel,
+                    contactName = chatArgs.contactName,
+                    onBack = { navController.popBackStack() }
+                )
             }
         }
     }

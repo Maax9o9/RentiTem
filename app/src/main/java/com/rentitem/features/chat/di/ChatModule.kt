@@ -25,13 +25,12 @@ object ChatModule {
     ): ChatRepository {
         val firestore = FirebaseFirestore.getInstance()
         val chatDao = AppDatabase.getInstance(context).chatDao()
-        val currentUserId = tokenManager.getUid() ?: ""
         
         return ChatRepositoryImpl(
             context = context,
             firestore = firestore,
             chatDao = chatDao,
-            currentUserId = currentUserId
+            tokenManager = tokenManager
         )
     }
 }

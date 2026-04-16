@@ -10,6 +10,16 @@ import com.rentitem.core.navigation.NavigationWrapper
 import com.rentitem.ui.theme.RentiTemTheme
 import dagger.hilt.android.AndroidEntryPoint
 
+import com.google.firebase.auth.FirebaseAuth
+
+import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private lateinit var appContainer: AppContainer
@@ -18,11 +28,36 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         
         appContainer = AppContainerImpl(this)
+
+        // Reparar TokenManager si falta el UID en sesiones persistentes
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null) {
+            val uid = currentUser.uid
+            if (appContainer.tokenManager.getUid() == null) {
+                appContainer.tokenManager.saveUid(uid)
+            }
+            // Sincronizar Token FCM para asegurar notificaciones
+            syncFcmToken(uid)
+        }
         
         enableEdgeToEdge()
         setContent {
             RentiTemTheme {
                 NavigationWrapper(appContainer)
+            }
+        }
+    }
+
+    private fun syncFcmToken(uid: String) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val token = FirebaseMessaging.getInstance().token.await()
+                val db = FirebaseFirestore.getInstance()
+                val data = hashMapOf("fcmToken" to token, "uid" to uid)
+                db.collection("users").document(uid).set(data, SetOptions.merge()).await()
+                android.util.Log.d("FCM_SYNC", "Token sincronizado: $token")
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }

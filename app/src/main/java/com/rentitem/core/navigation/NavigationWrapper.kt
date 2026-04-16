@@ -8,10 +8,18 @@ import com.rentitem.core.di.AppContainer
 import com.rentitem.features.login.navigation.loginScreen
 import com.rentitem.features.signup.navigation.signUpScreen
 
+import com.google.firebase.auth.FirebaseAuth
+
 @Composable
 fun NavigationWrapper(appContainer: AppContainer) {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Screen.Login) {
+    
+    // Verificamos si ya hay una sesión activa en Firebase y tenemos token local
+    val currentUser = FirebaseAuth.getInstance().currentUser
+    val hasLocalToken = appContainer.tokenManager.getToken() != null
+    val startDestination = if (currentUser != null && hasLocalToken) Screen.Main else Screen.Login
+
+    NavHost(navController = navController, startDestination = startDestination) {
         loginScreen(
             appContainer = appContainer,
             onNavigateToSignUp = { navController.navigate(Screen.SignUp) },
@@ -26,7 +34,14 @@ fun NavigationWrapper(appContainer: AppContainer) {
             onNavigateBack = { navController.popBackStack() }
         )
         composable<Screen.Main> {
-            MainScreen(appContainer = appContainer)
+            MainScreen(
+                appContainer = appContainer,
+                onLogout = {
+                    navController.navigate(Screen.Login) {
+                        popUpTo(Screen.Main) { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }

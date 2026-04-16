@@ -69,17 +69,38 @@ class ProfileViewModel @Inject constructor(
 
     fun updateProfile() {
         val currentForm = _formState.value
+        val previousState = _uiState.value
+        
+        // OPTIMISTIC UPDATE: Actualizamos la UI inmediatamente
+        if (previousState is ProfileUiState.Success) {
+            val optimisticProfile = previousState.profile.copy(
+                fullName = currentForm.fullName,
+                phone = currentForm.phone,
+                address = currentForm.address,
+                profilePic = currentForm.profilePicUri
+            )
+            _uiState.value = ProfileUiState.Success(optimisticProfile)
+        }
+
         viewModelScope.launch {
             _formState.update { it.copy(isUpdating = true, updateError = null, updateSuccess = false) }
+            
             updateProfileUseCase(
                 fullName = currentForm.fullName,
                 phone = currentForm.phone,
                 address = currentForm.address,
                 profilePicUri = currentForm.profilePicUri
             ).onSuccess { updatedProfile ->
-                _uiState.value = ProfileUiState.Success(updatedProfile)
+                // Mantenemos el email original ya que el update no lo devuelve
+                val finalProfile = if (previousState is ProfileUiState.Success) {
+                    updatedProfile.copy(email = previousState.profile.email)
+                } else updatedProfile
+                
+                _uiState.value = ProfileUiState.Success(finalProfile)
                 _formState.update { it.copy(isUpdating = false, updateSuccess = true) }
             }.onFailure { error ->
+                // ROLLBACK: Si falla, regresamos al estado anterior
+                _uiState.value = previousState
                 _formState.update { it.copy(isUpdating = false, updateError = error.message) }
             }
         }

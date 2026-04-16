@@ -10,7 +10,10 @@ class AuthInterceptor(private val tokenManager: TokenManager) : Interceptor {
         val request = chain.request().newBuilder()
 
         if (!token.isNullOrBlank()) {
+            android.util.Log.d("AUTH_DEBUG", "Sending Token: ${token.take(10)}...")
             request.addHeader("Authorization", "Bearer $token")
+        } else {
+            android.util.Log.d("AUTH_DEBUG", "No token found in TokenManager")
         }
 
         return chain.proceed(request.build())

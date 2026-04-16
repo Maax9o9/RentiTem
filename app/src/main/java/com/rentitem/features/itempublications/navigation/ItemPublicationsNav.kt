@@ -11,7 +11,9 @@ import com.rentitem.features.itempublications.presentation.viewmodels.Publicatio
 
 fun NavGraphBuilder.itemPublicationsScreen(
     appContainer: AppContainer,
-    onNavigateToProfile: () -> Unit
+    onNavigateToProfile: () -> Unit,
+    onNavigateToChat: (String, String) -> Unit = { _, _ -> },
+    onNavigateToChatList: () -> Unit = {}
 ) {
     composable<Screen.Publications> {
         val viewModel: PublicationsViewModel = viewModel(
@@ -19,7 +21,10 @@ fun NavGraphBuilder.itemPublicationsScreen(
         )
         PublicationsScreen(
             viewModel = viewModel,
+            currentUserId = appContainer.tokenManager.getUid() ?: "",
             onProfileClick = onNavigateToProfile,
+            onChatClick = onNavigateToChat,
+            onChatListClick = onNavigateToChatList,
             cameraManager = appContainer.cameraManager
         )
     }

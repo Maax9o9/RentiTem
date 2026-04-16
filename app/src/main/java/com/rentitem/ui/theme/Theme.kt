@@ -105,7 +105,8 @@ val unspecified_scheme = ColorFamily(
 @Composable
 fun RentiTemTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    // Forzamos dynamicColor a false por defecto para evitar que Android 12+ cambie los colores
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
   val colorScheme = when {
@@ -116,6 +117,15 @@ fun RentiTemTheme(
       
       darkTheme -> darkScheme
       else -> lightScheme
+  }
+
+  val view = androidx.compose.ui.platform.LocalView.current
+  if (!view.isInEditMode) {
+      androidx.compose.runtime.SideEffect {
+          val window = (view.context as Activity).window
+          window.statusBarColor = colorScheme.primary.toArgb()
+          androidx.core.view.WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+      }
   }
 
   MaterialTheme(

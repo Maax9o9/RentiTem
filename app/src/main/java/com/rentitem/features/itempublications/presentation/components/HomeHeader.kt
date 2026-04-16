@@ -1,14 +1,14 @@
 package com.rentitem.features.itempublications.presentation.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -17,20 +17,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-
 import coil.compose.AsyncImage
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.ui.layout.ContentScale
 
 @Composable
 fun HomeHeader(
     searchText: String,
     profilePic: String?,
+    unreadCount: Int = 0,
     onSearchChange: (String) -> Unit,
     onTriggerClick: () -> Unit,
-    onProfileClick: () -> Unit
+    onProfileClick: () -> Unit,
+    onChatListClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -51,7 +51,7 @@ fun HomeHeader(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "Explorar",
                     style = MaterialTheme.typography.headlineMedium,
@@ -65,28 +65,68 @@ fun HomeHeader(
                 )
             }
             
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer)
-                    .clickable { onProfileClick() },
-                contentAlignment = Alignment.Center
-            ) {
-                if (!profilePic.isNullOrEmpty()) {
-                    AsyncImage(
-                        model = profilePic,
-                        contentDescription = "Mi Perfil",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = "Ver Perfil",
-                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.size(28.dp)
-                    )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box {
+                    IconButton(
+                        onClick = onChatListClick,
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                            .size(44.dp)
+                            .background(MaterialTheme.colorScheme.secondaryContainer, CircleShape)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Chat,
+                            contentDescription = "Mensajes",
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+
+                    if (unreadCount > 0) {
+                        Surface(
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(end = 6.dp, top = 2.dp)
+                                .size(20.dp),
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.error,
+                            tonalElevation = 4.dp
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text(
+                                    text = if (unreadCount > 9) "9+" else unreadCount.toString(),
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .clickable { onProfileClick() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (!profilePic.isNullOrEmpty()) {
+                        AsyncImage(
+                            model = profilePic,
+                            contentDescription = "Mi Perfil",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Ver Perfil",
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
                 }
             }
         }

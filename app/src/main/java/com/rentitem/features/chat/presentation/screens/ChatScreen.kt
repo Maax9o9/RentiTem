@@ -21,6 +21,11 @@ import com.rentitem.features.chat.domain.entities.Message
 import com.rentitem.features.chat.presentation.viewmodels.ChatUiState
 import com.rentitem.features.chat.presentation.viewmodels.ChatViewModel
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import android.Manifest
+import android.os.Build
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(
@@ -30,6 +35,19 @@ fun ChatScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var inputText by remember { mutableStateOf("") }
+
+    // Permiso de notificaciones para Android 13+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        // Manejar el resultado si es necesario
+    }
+
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
 
     Scaffold(
         topBar = {

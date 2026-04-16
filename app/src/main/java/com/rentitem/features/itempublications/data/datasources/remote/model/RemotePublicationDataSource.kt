@@ -1,20 +1,26 @@
 package com.rentitem.features.itempublications.data.datasources.remote.model
 
+import com.google.firebase.auth.FirebaseAuth
 import com.rentitem.core.network.RentiTemApi
 import com.rentitem.features.itempublications.domain.entities.Publication
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
-import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.math.round
 
 @Singleton
 class RemotePublicationDataSource @Inject constructor(private val api: RentiTemApi) {
 
-    suspend fun getPublications(): List<Publication> =
-        api.getPublications().map { it.toDomain() }
+    suspend fun getPublications(): List<Publication> {
+        val dtos = api.getPublications()
+        dtos.forEach { dto ->
+            android.util.Log.d("API_DEBUG", "Publicación recibida -> ID: ${dto.id}, Titulo: ${dto.title}, UserID: '${dto.userId}'")
+        }
+        return dtos.map { it.toDomain() }
+    }
+
+    private fun roundToSixDecimals(value: Double): Double {
+        return (round(value * 1000000.0) / 1000000.0)
+    }
 
     suspend fun createPublication(
         title: String,
@@ -47,8 +53,9 @@ class RemotePublicationDataSource @Inject constructor(private val api: RentiTemA
             imageUrl = imageUrl,
             city = city,
             state = state,
-            latitude = latitude ?: 0.0,
-            longitude = longitude ?: 0.0
+            // Redondeamos para evitar errores de validación por exceso de decimales en el GPS físico
+            latitude = if (latitude != null) roundToSixDecimals(latitude) else 0.0,
+            longitude = if (longitude != null) roundToSixDecimals(longitude) else 0.0
         )
 
         val response = api.createPublication(request)
@@ -62,8 +69,9 @@ class RemotePublicationDataSource @Inject constructor(private val api: RentiTemA
             createdAt = null,
             city = city,
             state = state,
-            latitude = latitude,
-            longitude = longitude
+            latitude = request.latitude,
+            longitude = request.longitude,
+            userId = FirebaseAuth.getInstance().currentUser?.uid
         )
 
         return dto.toDomain()

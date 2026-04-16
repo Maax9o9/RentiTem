@@ -16,6 +16,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.rentitem.features.chat.presentation.viewmodels.ChatListViewModel
 import com.rentitem.core.hardware.domain.CameraManager
 import com.rentitem.features.itempublications.presentation.components.CreatePublicationModal
 import com.rentitem.features.itempublications.presentation.components.HomeHeader
@@ -27,12 +29,17 @@ import com.rentitem.features.itempublications.presentation.viewmodels.Publicatio
 @Composable
 fun PublicationsScreen(
     viewModel: PublicationsViewModel,
+    currentUserId: String,
     onProfileClick: () -> Unit,
-    cameraManager: CameraManager
+    onChatClick: (String, String) -> Unit,
+    onChatListClick: () -> Unit,
+    cameraManager: CameraManager,
+    chatListViewModel: ChatListViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val formState by viewModel.formState.collectAsStateWithLifecycle()
     val userProfile by viewModel.userProfile.collectAsStateWithLifecycle()
+    val unreadCount by chatListViewModel.totalUnreadCount.collectAsStateWithLifecycle()
     var showModal by remember { mutableStateOf(false) }
     var isCameraOpen by remember { mutableStateOf(false) }
 
@@ -46,9 +53,11 @@ fun PublicationsScreen(
             HomeHeader(
                 searchText = formState.searchText,
                 profilePic = userProfile?.profilePic,
+                unreadCount = unreadCount,
                 onSearchChange = { viewModel.onSearchChange(it) },
                 onTriggerClick = { showModal = true },
-                onProfileClick = onProfileClick
+                onProfileClick = onProfileClick,
+                onChatListClick = onChatListClick
             )
 
             // Profile Completion Banner
@@ -129,7 +138,9 @@ fun PublicationsScreen(
                                 items(state.publications) { item ->
                                     PublicationCard(
                                         publication = item,
-                                        onDelete = { id -> viewModel.deletePublication(id) }
+                                        currentUserId = currentUserId,
+                                        onDelete = { id -> viewModel.deletePublication(id) },
+                                        onChatClick = onChatClick
                                     )
                                 }
                             }

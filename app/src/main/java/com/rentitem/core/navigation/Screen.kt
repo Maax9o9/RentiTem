@@ -20,4 +20,10 @@ sealed class Screen {
 
     @Serializable
     data object Profile : Screen()
+
+    @Serializable
+    data object ChatList : Screen()
+
+    @Serializable
+    data class Chat(val conversationId: String, val contactName: String) : Screen()
 }

@@ -50,7 +50,7 @@ data class CreateItemResponse(
 )
 
 fun PublicationDto.toDomain(): Publication {
-    val baseUrl = "http://10.0.2.2:8080/"
+    val baseUrl = "http://192.168.1.9:8080/"
 
     return Publication(
         id = id,
@@ -74,6 +74,6 @@ fun PublicationDto.toDomain(): Publication {
                 "$baseUrl$cleanPath"
             }
         } else null,
-        userId = userId // Agregado UserId
+        userId = userId
     )
 }

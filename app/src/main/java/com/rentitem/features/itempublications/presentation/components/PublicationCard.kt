@@ -226,10 +226,13 @@ fun PublicationCard(
                     lineHeight = 20.sp
                 )
 
-                if (currentUserId != null && publication.userId != null && publication.userId != currentUserId) {
+                android.util.Log.d("CHAT_DEBUG", "Me: $currentUserId | Owner: ${publication.userId}")
+
+                // Forzamos visibilidad para pruebas (luego lo regresaremos a la lógica normal)
+                if (true) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
-                        onClick = { onChatClick(publication.userId, publication.title) },
+                        onClick = { onChatClick(publication.userId ?: "", publication.title) },
                         modifier = Modifier.fillMaxWidth().height(48.dp),
                         shape = RoundedCornerShape(12.dp)
                     ) {
